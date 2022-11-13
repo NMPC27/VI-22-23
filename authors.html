@@ -11,13 +11,81 @@ body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
 body {font-size:16px;}
 .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
 .w3-half img:hover{opacity:1}
+
+
+
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+.column {
+  float: left;
+  width: 50%;
+  margin-bottom: 16px;
+  padding: 0 8px;
+}
+
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  margin: 8px;
+}
+
+.about-section {
+  padding: 50px;
+  text-align: center;
+  background-color: #474e5d;
+  color: white;
+}
+
+.container {
+  padding: 0 16px;
+}
+
+.container::after, .row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.title {
+  color: grey;
+}
+
+.button {
+  border: none;
+  outline: 0;
+  display: inline-block;
+  padding: 8px;
+  color: white;
+  background-color: #000;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+.button:hover {
+  background-color: #555;
+}
+
+@media screen and (max-width: 650px) {
+  .column {
+    width: 100%;
+    display: block;
+  }
+}
+
+
 </style>
 </head>
 <body>
 
 <!-- Sidebar/menu -->
 <nav class="w3-sidebar w3-light-gray w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar"><br>
-    <img src="logo.png" alt="ERROR" width="100%" height="150">
+    <img src="img/logo.png" alt="ERROR" width="100%" height="150">
   <div class="w3-container">
     <h3 class="w3-padding"><b>OlympicInfo</b></h3>
   </div>
@@ -31,11 +99,57 @@ body {font-size:16px;}
 </nav>
 
 
-<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Mapa </p></div>
+<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Autores </p></div>
 
 
 <!-- !PAGE CONTENT! -->
+<div style="margin-left: 300px;
+padding-left: 2vw;
+padding-top: 5vw;">
 
+<div class="row">
+  <div class="column">
+    <div class="card">
+      <div style="width: 100%; overflow: hidden;">
+        <div style="width: 19vw; float: left;"> 
+          <img src="img/nuno.jpg" alt="Jane" style="width:15vw">
+        </div>
+        <div style="margin-left: 19vw;"> 
+          <br>
+          <h2>Nuno Cunha</h2>
+          <p class="title">98124</p>
+        </div>
+      </div>
+      <div class="container">
+        <p>Ambos os autores trabalharam equitativamente neste projeto.</p>
+        <p>Projeto desenvolvido no ambito da diciplina Visualização de Informação 22/23</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card">
+      <div style="width: 100%; overflow: hidden;">
+        <div style="width: 19vw; float: left;"> 
+          <img src="img/pedro.png" alt="Jane" style="width:15vw">
+        </div>
+        <div style="margin-left: 19vw;"> 
+          <br>
+          <h2>Pedro Lima</h2>
+          <p class="title">97860</p>
+        </div>
+      </div>
+      <div class="container">
+        <p>Ambos os autores trabalharam equitativamente neste projeto.</p>
+        <p>Projeto desenvolvido no ambito da diciplina Visualização de Informação 22/23</p>
+      </div>
+    </div>
+  </div>
+  
+
+</div>
+
+</div>
 
 </body>
 </html>
