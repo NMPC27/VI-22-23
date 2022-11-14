@@ -11,6 +11,19 @@ body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
 body {font-size:16px;}
 .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
 .w3-half img:hover{opacity:1}
+
+.flex-container {
+    display: flex;
+}
+
+.flex-child {
+    flex: 1;
+}  
+
+.flex-child:first-child {
+    margin-right: 20px;
+}  
+
 </style>
 </head>
 <body>
@@ -35,7 +48,36 @@ body {font-size:16px;}
 
 
 <!-- !PAGE CONTENT! -->
+<div style="margin-left: 300px;
+padding-left: 2vw;
+padding-top: 2vw;">
 
+
+<div class="flex-container" style="margin-top: 2vw;">
+
+  <div class="flex-child magenta">
+    Os Jogos Olímpicos são a única competição atlética verdadeiramente global, 
+    multiesportiva e comemorativa do mundo. Com mais de 200 países que participam 
+    de mais de 400 eventos nos Jogos Olímpicos de Verão e de Inverno, as Olimpíadas 
+    é onde o mundo compete, se sente inspirado e está unido.
+  </div>
+  
+  <div class="flex-child green">
+    <h1>
+      JOGOS <br>
+      OLÍMPICOS
+    </h1>
+  </div>
+  
+</div>
+
+<br>
+<br>
+
+
+<img src="img/paris2024.png" alt="ERRO" style="margin-left: 10vw; width:50vw">
+
+</div>
 
 </body>
 </html>
