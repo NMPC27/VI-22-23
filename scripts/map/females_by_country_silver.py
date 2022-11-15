@@ -11,6 +11,9 @@ with open('athlete_events.csv', 'r') as atheletes_events:
         # create csv reader and writer
         reader = csv.reader(atheletes_events)
         writer = csv.writer(atheletes_by_country)
+
+        writer.writerow(['code', 'games', 'participants'])
+
         # create empty dictionary
         atheletes_by_country_dict = {}
         # iterate over each row in atheletes_events.csv
