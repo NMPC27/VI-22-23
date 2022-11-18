@@ -170,9 +170,9 @@ const projection = d3.geoRobinson()
 	.translate([width / 2, height / 2]);
 
 // Define color scale
-const colorScale = d3.scaleThreshold()
-	.domain([50, 100, 200, 400, 600, 800])
-	.range(d3.schemeOrRd[7]);
+var colorScale = d3.scaleThreshold()
+	.domain([20, 50, 100, 200, 400, 600, 800])
+	.range(d3.schemeOrRd[8]);
 
 // add tooltip
 const tooltip = d3.select("body").append("div")
@@ -521,12 +521,12 @@ function ready(error, topo) {
 			return height - (i * ls_h) - ls_h - 6;
 		})
 		.text(function(d, i) {
-			if (i === 0) return "< " + d[1] / 1000000 + " m";
-			if (d[1] < d[0]) return d[0] / 1000000 + " m +";
-			return d[0] / 1000000 + " m - " + d[1] / 1000000 + " m";
+			if (i === 0) return "< " + d[1];
+			if (d[1] < d[0]) return d[0] + "+";
+			return d[0] + " - " + d[1];
 		});
 
-	legend.append("text").attr("x", 15).attr("y", 280).text("Population (Million)");
+	legend.append("text").attr("x", 15).attr("y", 410).text("Athletes");
 }
 
 // Zoom functionality
@@ -659,10 +659,7 @@ function click(d) {
     .scale(130)
     .translate([width / 2, height / 2]);
 
-  // Define color scale
-  const colorScale = d3.scaleThreshold()
-    .domain([20, 50, 100, 200, 400, 600, 800])
-    .range(d3.schemeOrRd[8]);
+  
 
   // add tooltip
   const tooltip = d3.select("body").append("div")
@@ -879,6 +876,61 @@ function click(d) {
 }
 
 // Load external data and boot
+
+var maximo = 0;
+
+
+d3.queue()
+  .defer(d3.csv, worldpopulation, function(d) {
+
+      d.participants = +d.participants;
+      
+      if (d.participants > maximo && d.games == edicao) {
+        maximo = d.participants;
+        console.log(maximo);
+      }
+      
+  })
+  .await(updateCor);
+
+function updateCor(error, data) {
+  maximo = Math.ceil(maximo / 10) * 10 - 10;
+    // Define color scale
+  
+    if(medalhas == "gold"){
+
+      colorScale = d3.scaleThreshold()
+        .domain([maximo*0.5/10, maximo*1/10, maximo*2/10, maximo*3/10, maximo*5/10, maximo*8/10, maximo])
+        .range(d3.schemeOrRd[8]);
+
+    }
+    else if (medalhas == "silver"){
+
+      colorScale = d3.scaleThreshold()
+        .domain([maximo*0.5/10, maximo*1/10, maximo*2/10, maximo*3/10, maximo*5/10, maximo*8/10, maximo])
+        .range(d3.schemeOrRd[8]);
+
+    }
+    else if (medalhas == "bronze"){
+
+      colorScale = d3.scaleThreshold()
+        .domain([maximo*0.5/10, maximo*1/10, maximo*2/10, maximo*3/10, maximo*5/10, maximo*8/10, maximo])
+        .range(d3.schemeOrRd[8]);
+
+    }
+    else if (medalhas == "any"){
+
+      colorScale = d3.scaleThreshold()
+        .domain([maximo*0.5/10, maximo*1/10, maximo*2/10, maximo*3/10, maximo*5/10, maximo*8/10, maximo])
+        .range(d3.schemeOrRd[8]);
+
+    }else{
+      colorScale = d3.scaleThreshold()
+        .domain([maximo*0.5/10, maximo*1/10, maximo*2/10, maximo*3/10, maximo*5/10, maximo*8/10, maximo])
+        .range(d3.schemeOrRd[8]);
+    }
+}
+
 d3.queue()
 	.defer(d3.json, worldmap)
 	.defer(d3.csv, worldpopulation, function(d) {
@@ -1012,7 +1064,7 @@ function ready(error, topo) {
 		})
 		.text(function(d, i) {
 			if (i === 0) return "< " + d[1] ;
-			if (d[1] < d[0]) return d[0] ;
+			if (d[1] < d[0]) return d[0];
 			return d[0]+ " - " + d[1];
 		});
 
