@@ -102,8 +102,12 @@ padding-left: 2vw;
 padding-top: 2vw;">
 
     <div style="width: 100%;">
-        <div style="width: 75%; height: 600px; float: left; background: green;"> 
-            bar chart
+        <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
+            <!-- Load d3.js -->
+            <script src="https://d3js.org/d3.v6.js"></script>
+
+            <!-- Create a div where the graph will take place -->
+            <div id="my_dataviz" style="height:600px;" ></div>
         </div>
         <div style="margin-left: 25%; height: 600px;" class="w3-light-gray"> 
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
@@ -187,20 +191,207 @@ function filter() {
 
     modalidade = modalidade.replace("’", "'");
 
-
-    console.log(modalidade);
-    console.log(genero_all.checked);
-    console.log(genero_m.checked);
-    console.log(genero_f.checked);
-    console.log(medalhas_any.checked);
-    console.log(medalhas_gold.checked);
-    console.log(medalhas_silver.checked);
-    console.log(medalhas_bronze.checked);
+    update_chart(modalidade, genero_all.checked, genero_m.checked, genero_f.checked, medalhas_any.checked, medalhas_gold.checked, medalhas_silver.checked, medalhas_bronze.checked);
 
 
 }
 
 </script>
+
+<script>
+
+    const margin = {top: 10, right: 30, bottom: 20, left: 50},
+    width = 875 - margin.left - margin.right,
+    height = 575 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    const svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("id", "my_svg")
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+    
+    // Parse the Data
+
+    d3.csv('data/modalities/all_medals.csv').then( function(data) {
+    
+
+    
+      // List of groups = species here = value of the first column called group -> I show them on the X axis
+
+      var allData=[]
+      
+
+      // List of subgroups = header of the csv files = soil condition here
+      const subgroups = data.columns.slice(2)
+
+      const groups = ['Escolha uma modalidade']
+    
+      // Add X axis
+      const x = d3.scaleBand()
+          .domain(groups)
+          .range([0, width])
+          .padding([0.2])
+      svg.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(d3.axisBottom(x).tickSizeOuter(0));
+    
+      // Add Y axis
+      const y = d3.scaleLinear()
+        .domain([0, 60])
+        .range([ height, 0 ]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // color palette = one color per subgroup
+      const color = d3.scaleOrdinal()
+        .domain(subgroups)
+        .range(['#CD7F32','#C0C0C0','#FFD700'])
+    
+      //stack the data? --> stack per subgroup
+      const stackedData = d3.stack()
+        .keys(subgroups)
+        (allData)
+    
+      // Show the bars
+      svg.append("g")
+        .selectAll("g")
+        // Enter in the stack data = loop key per key = group per group
+        .data(stackedData)
+        .join("g")
+          .attr("fill", d => color(d.key))
+          .selectAll("rect")
+          // enter a second time = loop subgroup per subgroup to add all rectangles
+          .data(d => d)
+          .join("rect")
+            .attr("x", d => x(d.data.country))
+            .attr("y", d => y(d[1]))
+            .attr("height", d => y(d[0]) - y(d[1]))
+            .attr("width",x.bandwidth())
+    })
+
+  function update_chart(modalidade,genero_all,genero_m,genero_f,medalhas_any,medalhas_gold,medalhas_silver,medalhas_bronze) {
+
+    // clean the map
+    document.getElementById("my_svg").remove();
+
+    // set the dimensions and margins of the graph
+    const margin = {top: 10, right: 30, bottom: 20, left: 50},
+      width = 875 - margin.left - margin.right,
+      height = 575 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    const svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("id", "my_svg")
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+    
+    // Parse the Data
+
+    var file=""
+    if (genero_all){
+      file="data/modalities/all_medals.csv"
+    }else if (genero_m){
+      file="./data/modalities/males_medals.csv"
+    }else if (genero_f){
+      file="./data/modalities/females_medals.csv"
+    }
+
+    d3.csv(file).then( function(data) {
+    
+
+    
+      // List of groups = species here = value of the first column called group -> I show them on the X axis
+
+      
+      var newData=[]
+      var allData=[]
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].event==modalidade){
+          newData.push(data[i].country)
+          
+          if (medalhas_any){
+            allData.push({'country': data[i].country, 'bronze': data[i].bronze, 'silver': data[i].silver, 'gold': data[i].gold})
+          }
+          else if(medalhas_gold){
+            allData.push({'country': data[i].country, 'bronze': 0, 'silver': 0, 'gold': data[i].gold})
+          }
+          else if(medalhas_silver){
+            allData.push({'country': data[i].country, 'bronze': 0, 'silver': data[i].silver, 'gold': 0})
+          }
+          else if(medalhas_bronze){
+            allData.push({'country': data[i].country, 'bronze': data[i].bronze, 'silver': 0, 'gold': 0})
+          }
+
+
+          
+        }
+      }
+
+      // List of subgroups = header of the csv files = soil condition here
+      const subgroups = data.columns.slice(2)
+
+      const groups = newData
+    
+      // Add X axis
+      const x = d3.scaleBand()
+          .domain(groups)
+          .range([0, width])
+          .padding([0.2])
+      svg.append("g")
+        .attr("transform", `translate(0, ${height})`)
+        .call(d3.axisBottom(x).tickSizeOuter(0));
+    
+
+      var max=0
+      for (let i = 0; i < allData.length; i++) {
+        tmp=parseInt(allData[i].bronze)+parseInt(allData[i].silver)+parseInt(allData[i].gold)
+        if (tmp>max){
+          max=tmp
+        }
+      }
+
+      // Add Y axis
+      const y = d3.scaleLinear()
+        .domain([0, max+10])
+        .range([ height, 0 ]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // color palette = one color per subgroup
+      const color = d3.scaleOrdinal()
+        .domain(subgroups)
+        .range(['#CD7F32','#C0C0C0','#FFD700'])
+    
+      //stack the data? --> stack per subgroup
+      const stackedData = d3.stack()
+        .keys(subgroups)
+        (allData)
+    
+      // Show the bars
+      svg.append("g")
+        .selectAll("g")
+        // Enter in the stack data = loop key per key = group per group
+        .data(stackedData)
+        .join("g")
+          .attr("fill", d => color(d.key))
+          .selectAll("rect")
+          // enter a second time = loop subgroup per subgroup to add all rectangles
+          .data(d => d)
+          .join("rect")
+            .attr("x", d => x(d.data.country))
+            .attr("y", d => y(d[1]))
+            .attr("height", d => y(d[0]) - y(d[1]))
+            .attr("width",x.bandwidth())
+    })
+  }
+  
+  </script>
 
 <script>
     function autocomplete(inp, arr) {
