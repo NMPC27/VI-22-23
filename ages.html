@@ -6,6 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v6.js"></script>
+
+
 <style>
   body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
   body {font-size:16px;}
@@ -87,13 +92,13 @@
     <a href="index.html"  class="w3-bar-item w3-button w3-hover-blue">Home</a> 
     <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Mapa</a> 
     <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalidades</a> 
-    <a href="ages.html"  class="w3-bar-item w3-button w3-hover-green">Idades</a> 
+    <a href="ages.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
     <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Autores</a> 
   </div>
 </nav>
 
 
-<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Idades </p></div>
+<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Performance </p></div>
 
 
 <!-- !PAGE CONTENT! -->
@@ -102,22 +107,36 @@ padding-left: 2vw;
 padding-top: 2vw;">
 
     <div style="width: 100%;">
-        <div style="width: 75%; height: 600px; float: left; background: green;"> 
-            collum chart
+        <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
+          <div id="my_dataviz"></div>
         </div>
         <div style="margin-left: 25%; height: 600px;" class="w3-light-gray"> 
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
 
 
                 <h1>Filtros</h1>
-                <p>Modalidade</p>
+                <p>Países</p>
                 <div class="search-container">
                     
                     <div class="autocomplete" style="width:300px;">
-                        <input id="myInput" type="text" name="myCountry" placeholder="Modalidade">
+                        <input id="pais1" type="text" name="myCountry" placeholder="País">
                     </div>
                     
                 </div>
+                <div class="search-container">
+                    
+                  <div class="autocomplete" style="width:300px;">
+                      <input id="pais2" type="text" name="myCountry" placeholder="País">
+                  </div>
+                  
+              </div>
+              <div class="search-container">
+                    
+                <div class="autocomplete" style="width:300px;">
+                    <input id="pais3" type="text" name="myCountry" placeholder="País">
+                </div>
+                
+            </div>
                 <hr class="rounded" style="width: 17vw;">
 
                 <p>Género</p>
@@ -130,8 +149,10 @@ padding-top: 2vw;">
                 <hr class="rounded" style="width: 17vw;">
 
                 <p>Medalhas</p>
+                <input type="radio" id="all_medal" name="medals" value="all_medal">
+                <label for="all_medal">Todos</label><br>
                 <input type="radio" id="any" name="medals" value="any">
-                <label for="any">Todos</label><br>
+                <label for="any">Qualquer medalha</label><br>
                 <input type="radio" id="gold" name="medals" value="gold">
                 <label for="gold">Ouro</label><br>  
                 <input type="radio" id="silver" name="medals" value="silver">
@@ -152,26 +173,1017 @@ padding-top: 2vw;">
 
 <script>
 
+  // ON LOAD
+
+// set the dimensions and margins of the graph
+const margin = {top: 10, right: 100, bottom: 30, left: 30},
+        width = 900 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    const svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",`translate(${margin.left},${margin.top})`);
+    
+    //Read the data
+
+    var csv_data = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_connectedscatter.csv";
+
+
+    d3.csv(csv_data).then(function(data) {
+    
+        // List of groups (here I have one group per column)
+        const allGroup = ["valueA", "valueB", "valueC"]
+    
+        // Reformat the data: we need an array of arrays of {x, y} tuples
+        const dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
+          return {
+            name: grpName,
+            values: data.map(function(d) {
+              return {time: d.time, value: +d[grpName]};
+            })
+          };
+        });
+        // I strongly advise to have a look to dataReady with
+        //console.log(dataReady)
+    
+        // A color scale: one color for each group
+        const myColor = d3.scaleOrdinal()
+          .domain(allGroup)
+          .range(d3.schemeSet2);
+    
+        // Add X axis --> it is a date format
+        const x = d3.scaleLinear()
+          .domain([0,10])
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", `translate(0, ${height})`)
+          .call(d3.axisBottom(x));
+    
+        // Add Y axis
+        const y = d3.scaleLinear()
+          .domain( [0,20])
+          .range([ height, 0 ]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
+    
+        // Add the lines
+        const line = d3.line()
+          .x(d => x(+d.time))
+          .y(d => y(+d.value))
+        svg.selectAll("myLines")
+          .data(dataReady)
+          .join("path")
+            .attr("class", d => d.name)
+            .attr("d", d => line(d.values))
+            .attr("stroke", d => myColor(d.name))
+            .style("stroke-width", 4)
+            .style("fill", "none")
+    
+        // Add the points
+        svg
+          // First we need to enter in a group
+          .selectAll("myDots")
+          .data(dataReady)
+          .join('g')
+            .style("fill", d => myColor(d.name))
+            .attr("class", d => d.name)
+          // Second we need to enter in the 'values' part of this group
+          .selectAll("myPoints")
+          .data(d => d.values)
+          .join("circle")
+            .attr("cx", d => x(d.time))
+            .attr("cy", d => y(d.value))
+            .attr("r", 5)
+            .attr("stroke", "white")
+    
+        // Add a label at the end of each line
+        svg
+          .selectAll("myLabels")
+          .data(dataReady)
+          .join('g')
+            .append("text")
+              .attr("class", d => d.name)
+              .datum(d => { return {name: d.name, value: d.values[d.values.length - 1]}; }) // keep only the last value of each time series
+              .attr("transform", d => `translate(${x(d.value.time)},${y(d.value.value)})`) // Put the text at the position of the last point
+              .attr("x", 12) // shift the text a bit more right
+              .text(d => d.name)
+              .style("fill", d => myColor(d.name))
+              .style("font-size", 15)
+    
+        // Add a legend (interactive)
+        svg
+          .selectAll("myLegend")
+          .data(dataReady)
+          .join('g')
+            .append("text")
+              .attr('x', (d,i) => 30 + i*60)
+              .attr('y', 30)
+              .text(d => d.name)
+              .style("fill", d => myColor(d.name))
+              .style("font-size", 15)
+            .on("click", function(event,d){
+              // is the element currently visible ?
+              currentOpacity = d3.selectAll("." + d.name).style("opacity")
+              // Change the opacity: from 0 to 1 or from 1 to 0
+              d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+    
+            })
+    })
+
+
+</script>
+
+<script>
+
+  function create_graph(pais1,pais2,pais3,genero,medalhas){
+
+    d3.select("#my_dataviz").selectAll('*').remove();
+
+    // set the dimensions and margins of the graph
+    const margin = {top: 10, right: 100, bottom: 30, left: 30},
+        width = 900 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+    const translate = {
+  "Afghanistan": {
+    "NOC": "AFG"
+  },
+  "Curacao": {
+    "NOC": "AHO"
+  },
+  "Albania": {
+    "NOC": "ALB"
+  },
+  "Algeria": {
+    "NOC": "ALG"
+  },
+  "Andorra": {
+    "NOC": "AND"
+  },
+  "Angola": {
+    "NOC": "ANG"
+  },
+  "Antigua": {
+    "NOC": "ANT"
+  },
+  "Argentina": {
+    "NOC": "ARG"
+  },
+  "Armenia": {
+    "NOC": "ARM"
+  },
+  "Aruba": {
+    "NOC": "ARU"
+  },
+  "American Samoa": {
+    "NOC": "ASA"
+  },
+  "Australia": {
+    "NOC": "AUS"
+  },
+  "Austria": {
+    "NOC": "AUT"
+  },
+  "Azerbaijan": {
+    "NOC": "AZE"
+  },
+  "Bahamas": {
+    "NOC": "BAH"
+  },
+  "Bangladesh": {
+    "NOC": "BAN"
+  },
+  "Barbados": {
+    "NOC": "BAR"
+  },
+  "Burundi": {
+    "NOC": "BDI"
+  },
+  "Belgium": {
+    "NOC": "BEL"
+  },
+  "Benin": {
+    "NOC": "BEN"
+  },
+  "Bermuda": {
+    "NOC": "BER"
+  },
+  "Bhutan": {
+    "NOC": "BHU"
+  },
+  "Bosnia and Herzegovina": {
+    "NOC": "BIH"
+  },
+  "Belize": {
+    "NOC": "BIZ"
+  },
+  "Belarus": {
+    "NOC": "BLR"
+  },
+  "Boliva": {
+    "NOC": "BOL"
+  },
+  "Botswana": {
+    "NOC": "BOT"
+  },
+  "Brazil": {
+    "NOC": "BRA"
+  },
+  "Bahrain": {
+    "NOC": "BRN"
+  },
+  "Brunei": {
+    "NOC": "BRU"
+  },
+  "Bulgaria": {
+    "NOC": "BUL"
+  },
+  "Burkina Faso": {
+    "NOC": "BUR"
+  },
+  "Central African Republic": {
+    "NOC": "CAF"
+  },
+  "Cambodia": {
+    "NOC": "CAM"
+  },
+  "Canada": {
+    "NOC": "CAN"
+  },
+  "Cayman Islands": {
+    "NOC": "CAY"
+  },
+  "Republic of Congo": {
+    "NOC": "CGO"
+  },
+  "Chad": {
+    "NOC": "CHA"
+  },
+  "Chile": {
+    "NOC": "CHI"
+  },
+  "China": {
+    "NOC": "CHN"
+  },
+  "Ivory Coast": {
+    "NOC": "CIV"
+  },
+  "Cameroon": {
+    "NOC": "CMR"
+  },
+  "Democratic Republic of the Congo": {
+    "NOC": "COD"
+  },
+  "Cook Islands": {
+    "NOC": "COK"
+  },
+  "Colombia": {
+    "NOC": "COL"
+  },
+  "Comoros": {
+    "NOC": "COM"
+  },
+  "Cape Verde": {
+    "NOC": "CPV"
+  },
+  "Costa Rica": {
+    "NOC": "CRC"
+  },
+  "Croatia": {
+    "NOC": "CRO"
+  },
+  "Cuba": {
+    "NOC": "CUB"
+  },
+  "Cyprus": {
+    "NOC": "CYP"
+  },
+  "Czech Republic": {
+    "NOC": "CZE"
+  },
+  "Denmark": {
+    "NOC": "DEN"
+  },
+  "Djibouti": {
+    "NOC": "DJI"
+  },
+  "Dominica": {
+    "NOC": "DMA"
+  },
+  "Dominican Republic": {
+    "NOC": "DOM"
+  },
+  "Ecuador": {
+    "NOC": "ECU"
+  },
+  "Egypt": {
+    "NOC": "EGY"
+  },
+  "Eritrea": {
+    "NOC": "ERI"
+  },
+  "El Salvador": {
+    "NOC": "ESA"
+  },
+  "Spain": {
+    "NOC": "ESP"
+  },
+  "Estonia": {
+    "NOC": "EST"
+  },
+  "Ethiopia": {
+    "NOC": "ETH"
+  },
+  "Fiji": {
+    "NOC": "FIJ"
+  },
+  "Finland": {
+    "NOC": "FIN"
+  },
+  "France": {
+    "NOC": "FRA"
+  },
+  "Micronesia": {
+    "NOC": "FSM"
+  },
+  "Gabon": {
+    "NOC": "GAB"
+  },
+  "Gambia": {
+    "NOC": "GAM"
+  },
+  "UK": {
+    "NOC": "GBR"
+  },
+  "Guinea-Bissau": {
+    "NOC": "GBS"
+  },
+  "Georgia": {
+    "NOC": "GEO"
+  },
+  "Equatorial Guinea": {
+    "NOC": "GEQ"
+  },
+  "Germany": {
+    "NOC": "GER"
+  },
+  "Ghana": {
+    "NOC": "GHA"
+  },
+  "Greece": {
+    "NOC": "GRE"
+  },
+  "Grenada": {
+    "NOC": "GRN"
+  },
+  "Guatemala": {
+    "NOC": "GUA"
+  },
+  "Guinea": {
+    "NOC": "GUI"
+  },
+  "Guam": {
+    "NOC": "GUM"
+  },
+  "Guyana": {
+    "NOC": "GUY"
+  },
+  "Haiti": {
+    "NOC": "HAI"
+  },
+  "Honduras": {
+    "NOC": "HON"
+  },
+  "Hungary": {
+    "NOC": "HUN"
+  },
+  "Indonesia": {
+    "NOC": "INA"
+  },
+  "India": {
+    "NOC": "IND"
+  },
+  "Individual Olympic Athletes": {
+    "NOC": "IOA"
+  },
+  "Iran": {
+    "NOC": "IRI"
+  },
+  "Ireland": {
+    "NOC": "IRL"
+  },
+  "Iraq": {
+    "NOC": "IRQ"
+  },
+  "Iceland": {
+    "NOC": "ISL"
+  },
+  "Israel": {
+    "NOC": "ISR"
+  },
+  "Virgin Islands, US": {
+    "NOC": "ISV"
+  },
+  "Italy": {
+    "NOC": "ITA"
+  },
+  "Virgin Islands, British": {
+    "NOC": "IVB"
+  },
+  "Jamaica": {
+    "NOC": "JAM"
+  },
+  "Jordan": {
+    "NOC": "JOR"
+  },
+  "Japan": {
+    "NOC": "JPN"
+  },
+  "Kazakhstan": {
+    "NOC": "KAZ"
+  },
+  "Kenya": {
+    "NOC": "KEN"
+  },
+  "Kyrgyzstan": {
+    "NOC": "KGZ"
+  },
+  "Kiribati": {
+    "NOC": "KIR"
+  },
+  "South Korea": {
+    "NOC": "KOR"
+  },
+  "Kosovo": {
+    "NOC": "KOS"
+  },
+  "Saudi Arabia": {
+    "NOC": "KSA"
+  },
+  "Kuwait": {
+    "NOC": "KUW"
+  },
+  "Laos": {
+    "NOC": "LAO"
+  },
+  "Latvia": {
+    "NOC": "LAT"
+  },
+  "Libya": {
+    "NOC": "LBA"
+  },
+  "Liberia": {
+    "NOC": "LBR"
+  },
+  "Saint Lucia": {
+    "NOC": "LCA"
+  },
+  "Lesotho": {
+    "NOC": "LES"
+  },
+  "Lebanon": {
+    "NOC": "LIB"
+  },
+  "Liechtenstein": {
+    "NOC": "LIE"
+  },
+  "Lithuania": {
+    "NOC": "LTU"
+  },
+  "Luxembourg": {
+    "NOC": "LUX"
+  },
+  "Madagascar": {
+    "NOC": "MAD"
+  },
+  "Malaysia": {
+    "NOC": "MAL"
+  },
+  "Morocco": {
+    "NOC": "MAR"
+  },
+  "Malawi": {
+    "NOC": "MAW"
+  },
+  "Moldova": {
+    "NOC": "MDA"
+  },
+  "Maldives": {
+    "NOC": "MDV"
+  },
+  "Mexico": {
+    "NOC": "MEX"
+  },
+  "Mongolia": {
+    "NOC": "MGL"
+  },
+  "Marshall Islands": {
+    "NOC": "MHL"
+  },
+  "Macedonia": {
+    "NOC": "MKD"
+  },
+  "Mali": {
+    "NOC": "MLI"
+  },
+  "Malta": {
+    "NOC": "MLT"
+  },
+  "Montenegro": {
+    "NOC": "MNE"
+  },
+  "Monaco": {
+    "NOC": "MON"
+  },
+  "Mozambique": {
+    "NOC": "MOZ"
+  },
+  "Mauritius": {
+    "NOC": "MRI"
+  },
+  "Mauritania": {
+    "NOC": "MTN"
+  },
+  "Myanmar": {
+    "NOC": "MYA"
+  },
+  "Namibia": {
+    "NOC": "NAM"
+  },
+  "Nicaragua": {
+    "NOC": "NCA"
+  },
+  "Netherlands": {
+    "NOC": "NED"
+  },
+  "Nepal": {
+    "NOC": "NEP"
+  },
+  "Nigeria": {
+    "NOC": "NGR"
+  },
+  "Niger": {
+    "NOC": "NIG"
+  },
+  "Norway": {
+    "NOC": "NOR"
+  },
+  "Nauru": {
+    "NOC": "NRU"
+  },
+  "New Zealand": {
+    "NOC": "NZL"
+  },
+  "Oman": {
+    "NOC": "OMA"
+  },
+  "Pakistan": {
+    "NOC": "PAK"
+  },
+  "Panama": {
+    "NOC": "PAN"
+  },
+  "Paraguay": {
+    "NOC": "PAR"
+  },
+  "Peru": {
+    "NOC": "PER"
+  },
+  "Philippines": {
+    "NOC": "PHI"
+  },
+  "Palestine": {
+    "NOC": "PLE"
+  },
+  "Palau": {
+    "NOC": "PLW"
+  },
+  "Papua New Guinea": {
+    "NOC": "PNG"
+  },
+  "Poland": {
+    "NOC": "POL"
+  },
+  "Portugal": {
+    "NOC": "POR"
+  },
+  "North Korea": {
+    "NOC": "PRK"
+  },
+  "Puerto Rico": {
+    "NOC": "PUR"
+  },
+  "Qatar": {
+    "NOC": "QAT"
+  },
+  "NA": {
+    "NOC": "UNK"
+  },
+  "Romania": {
+    "NOC": "ROU"
+  },
+  "South Africa": {
+    "NOC": "RSA"
+  },
+  "Russia": {
+    "NOC": "RUS"
+  },
+  "Rwanda": {
+    "NOC": "RWA"
+  },
+  "Samoa": {
+    "NOC": "SAM"
+  },
+  "Senegal": {
+    "NOC": "SEN"
+  },
+  "Seychelles": {
+    "NOC": "SEY"
+  },
+  "Singapore": {
+    "NOC": "SIN"
+  },
+  "Saint Kitts": {
+    "NOC": "SKN"
+  },
+  "Sierra Leone": {
+    "NOC": "SLE"
+  },
+  "Slovenia": {
+    "NOC": "SLO"
+  },
+  "San Marino": {
+    "NOC": "SMR"
+  },
+  "Solomon Islands": {
+    "NOC": "SOL"
+  },
+  "Somalia": {
+    "NOC": "SOM"
+  },
+  "Serbia": {
+    "NOC": "SRB"
+  },
+  "Sri Lanka": {
+    "NOC": "SRI"
+  },
+  "South Sudan": {
+    "NOC": "SSD"
+  },
+  "Sao Tome and Principe": {
+    "NOC": "STP"
+  },
+  "Sudan": {
+    "NOC": "SUD"
+  },
+  "Switzerland": {
+    "NOC": "SUI"
+  },
+  "Suriname": {
+    "NOC": "SUR"
+  },
+  "Slovakia": {
+    "NOC": "SVK"
+  },
+  "Sweden": {
+    "NOC": "SWE"
+  },
+  "Swaziland": {
+    "NOC": "SWZ"
+  },
+  "Syria": {
+    "NOC": "SYR"
+  },
+  "Tanzania": {
+    "NOC": "TAN"
+  },
+  "Tonga": {
+    "NOC": "TGA"
+  },
+  "Thailand": {
+    "NOC": "THA"
+  },
+  "Tajikistan": {
+    "NOC": "TJK"
+  },
+  "Turkmenistan": {
+    "NOC": "TKM"
+  },
+  "Timor-Leste": {
+    "NOC": "TLS"
+  },
+  "Togo": {
+    "NOC": "TOG"
+  },
+  "Taiwan": {
+    "NOC": "TPE"
+  },
+  "Trinidad": {
+    "NOC": "TTO"
+  },
+  "Tunisia": {
+    "NOC": "TUN"
+  },
+  "Turkey": {
+    "NOC": "TUR"
+  },
+  "United Arab Emirates": {
+    "NOC": "UAE"
+  },
+  "Uganda": {
+    "NOC": "UGA"
+  },
+  "Ukraine": {
+    "NOC": "UKR"
+  },
+  "Uruguay": {
+    "NOC": "URU"
+  },
+  "USA": {
+    "NOC": "USA"
+  },
+  "Uzbekistan": {
+    "NOC": "UZB"
+  },
+  "Vanuatu": {
+    "NOC": "VAN"
+  },
+  "Venezuela": {
+    "NOC": "VEN"
+  },
+  "Vietnam": {
+    "NOC": "VIE"
+  },
+  "Saint Vincent": {
+    "NOC": "VIN"
+  },
+  "Yemen": {
+    "NOC": "YEM"
+  },
+  "Zambia": {
+    "NOC": "ZAM"
+  },
+  "Zimbabwe": {
+    "NOC": "ZIM"
+  }
+}
+        
+    // append the svg object to the body of the page
+    const svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",`translate(${margin.left},${margin.top})`);
+    
+
+        var csv_data = "./data/map/athletes_by_country.csv";
+        switch(true) {
+      case genero === "all" && medalhas === "all_medal":
+        
+          csv_data = "./data/map/athletes_by_country.csv";
+
+        break;
+      case genero === "all" && medalhas === "any":
+      
+          csv_data = "./data/map/athletes_by_country_any.csv";
+
+        break;
+
+      case genero === "all" && medalhas === "gold":
+          csv_data = "./data/map/athletes_by_country_gold.csv";
+
+        break;
+      case genero ===  "all" &&  medalhas === "silver":
+          csv_data = "./data/map/athletes_by_country_silver.csv";
+
+        break;
+      case genero ===  "all" &&  medalhas === "bronze":
+          csv_data = "./data/map/athletes_by_country_bronze.csv";
+        
+        break;
+
+      case genero ===  "f" &&   medalhas ===  "all_medal":
+        
+          csv_data = "./data/map/females_by_country.csv";
+
+        break;
+      case genero ===  "f" &&  medalhas ===  "any":
+      
+          csv_data = "./data/map/females_by_country_any.csv";
+
+        break;
+
+      case genero ===  "f" &&  medalhas ===  "gold":
+        csv_data = "./data/map/females_by_country_gold.csv";
+
+        break;
+      case genero ===   "f" &&  medalhas ===  "silver":
+          csv_data = "./data/map/females_by_country_silver.csv";
+
+        break;
+      case genero ===  "f" &&  medalhas ===  "bronze":
+          csv_data = "./data/map/females_by_country_bronze.csv";
+        
+        break;
+
+      case genero ===   "m" && medalhas === "all_medal":
+        
+          csv_data = "./data/map/males_by_country.csv";
+
+        break;
+      case genero ===   "m" && medalhas === "any":
+      
+          csv_data = "./data/map/males_by_country_any.csv";
+
+        break;
+
+      case genero ===   "m" && medalhas === "gold":
+          csv_data = "./data/map/males_by_country_gold.csv";
+
+        break;
+      case genero === "m" && medalhas === "silver":
+          csv_data = "./data/map/males_by_country_silver.csv";
+
+        break;
+      case genero === "m" && medalhas === "bronze":
+      csv_data = "./data/map/males_by_country_bronze.csv";
+        
+        break;
+      
+      default:
+        csv_data = "./data/map/athletes_by_country.csv";
+    }
+    //Read the data
+    d3.csv(csv_data).then(function(data) {
+
+        // List of groups (here I have one group per column)
+        const allGroup = [pais1, pais2, pais3]
+
+        const jogos = ["1980 Summer","1984 Summer","1988 Summer","1992 Summer","1996 Summer","2000 Summer","2004 Summer","2008 Summer","2012 Summer","2016 Summer"];
+        // Reformat the data: we need an array of arrays of {x, y} tuples
+        const dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
+          return {
+            name: grpName,
+            values: data.filter(function(d){
+
+              if (jogos.includes(d.games) && d.code == translate[grpName].NOC ) {
+                return true;
+              }
+              return false;
+
+            }).map(function(d) {
+                tmp = d.games.split(" ");            
+                return {time: +tmp[0], value: +d.participants}
+
+            })
+          };
+        });
+        // I strongly advise to have a look to dataReady with
+    
+        var max = 0;
+        for (let i = 0; i < dataReady.length; i++) {
+          
+          dataReady[i].values.sort(function(a, b) {
+            return a.time - b.time;
+          });
+
+          if (Math.max(max, d3.max(dataReady[i].values, function(d) { return d.value; })) > max){
+            max = Math.max(max, d3.max(dataReady[i].values, function(d) { return d.value; }));
+          }
+        }
+
+        max = max * 1.15;
+        console.log(dataReady)
+
+
+        // A color scale: one color for each group
+        const myColor = d3.scaleOrdinal()
+          .domain(allGroup)
+          .range(d3.schemeSet2);
+    
+        // Add X axis --> it is a date format
+        const x = d3.scaleLinear()
+          .domain(d3.extent(jogos, function(d) { 
+            tmp = d.split(" ");
+            return tmp[0]; }))
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", `translate(0, ${height})`)
+          .call(d3.axisBottom(x));
+    
+        // Add Y axis
+
+        const y = d3.scaleLinear()
+          .domain( [0,max])
+          .range([ height, 0 ]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
+    
+        // Add the lines
+        const line = d3.line()
+          .x(d => x(+d.time))
+          .y(d => y(+d.value))
+        svg.selectAll("myLines")
+          .data(dataReady)
+          .join("path")
+            .attr("class", d => d.name)
+            .attr("d", d => line(d.values))
+            .attr("stroke", d => myColor(d.name))
+            .style("stroke-width", 4)
+            .style("fill", "none")
+    
+        // Add the points
+        svg
+          // First we need to enter in a group
+          .selectAll("myDots")
+          .data(dataReady)
+          .join('g')
+            .style("fill", d => myColor(d.name))
+            .attr("class", d => d.name)
+          // Second we need to enter in the 'values' part of this group
+          .selectAll("myPoints")
+          .data(d => d.values)
+          .join("circle")
+            .attr("cx", d => x(d.time))
+            .attr("cy", d => y(d.value))
+            .attr("r", 5)
+            .attr("stroke", "white")
+    
+        // Add a label at the end of each line
+        svg
+          .selectAll("myLabels")
+          .data(dataReady)
+          .join('g')
+            .append("text")
+              .attr("class", d => d.name)
+              .datum(d => { return {name: d.name, value: d.values[d.values.length - 1]}; }) // keep only the last value of each time series
+              .attr("transform", d => `translate(${x(d.value.time)},${y(d.value.value)})`) // Put the text at the position of the last point
+              .attr("x", 12) // shift the text a bit more right
+              .text(d => d.name)
+              .style("fill", d => myColor(d.name))
+              .style("font-size", 15)
+    
+        // Add a legend (interactive)
+        svg
+          .selectAll("myLegend")
+          .data(dataReady)
+          .join('g')
+            .append("text")
+              .attr('x', (d,i) => 30 + i*60)
+              .attr('y', 30)
+              .text(d => d.name)
+              .style("fill", d => myColor(d.name))
+              .style("font-size", 15)
+            .on("click", function(event,d){
+              // is the element currently visible ?
+              currentOpacity = d3.selectAll("." + d.name).style("opacity")
+              // Change the opacity: from 0 to 1 or from 1 to 0
+              d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+    
+            })
+    })
+  }
+  </script>
+
+<script>
+
 function filter() {
 
-    var modalidade = document.getElementById("myInput").value;
+    var pais1 = document.getElementById("pais1").value;
+    var pais2 = document.getElementById("pais2").value;
+    var pais3 = document.getElementById("pais3").value;
+
 
     var genero_all = document.getElementById("all");
     var genero_m = document.getElementById("m");
     var genero_f = document.getElementById("f");
 
     var medalhas_any = document.getElementById("any");
+    var medalhas_all = document.getElementById("all_medal");
     var medalhas_gold = document.getElementById("gold");
     var medalhas_silver = document.getElementById("silver");
     var medalhas_bronze = document.getElementById("bronze");
 
-    if (modalidade == "") {
-        alert("Modalidade não selecionada");
+    if (pais1 == "" && pais2 == "" && pais3 == "") {
+        alert("Por favor, selecione pelo menos 1 país");
         return
     } 
 
-    if (!countries.includes(modalidade)){
-        alert("Modalidade inválida");
+    if (!countries.includes(pais1) && pais1 != "") {
+        alert("País1 inválido");
+        return
+    }
+    if (!countries.includes(pais2) && pais2 != "") {
+        alert("País2 inválido");
+        return
+    }
+    if (!countries.includes(pais3) && pais3 != "") {
+        alert("País3 inválido");
         return
     }
     
@@ -180,23 +1192,48 @@ function filter() {
         return
     } 
     
-    if (medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false) {
+    if (medalhas_all.checked == false && medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false) {
         alert("Medalhas não selecionadas");
         return
     }
 
-    modalidade = modalidade.replace("’", "'");
 
 
-    console.log(modalidade);
+    console.log(pais1);
+    console.log(pais2);
+    console.log(pais3);
+
     console.log(genero_all.checked);
     console.log(genero_m.checked);
     console.log(genero_f.checked);
     console.log(medalhas_any.checked);
+    console.log(medalhas_all.checked);
     console.log(medalhas_gold.checked);
     console.log(medalhas_silver.checked);
     console.log(medalhas_bronze.checked);
 
+    if (genero_all.checked == true) {
+        genero = "all"
+    } else if (genero_m.checked == true) {
+        genero = "m"
+    } else if (genero_f.checked == true) {
+        genero = "f"
+    }
+
+    if (medalhas_all.checked == true) {
+        medalhas = "all_medal"
+    } else if (medalhas_any.checked == true) {
+        medalhas = "any"
+    } else if (medalhas_gold.checked == true) {
+        medalhas = "gold"
+    } else if (medalhas_silver.checked == true) {
+        medalhas = "silver"
+    } else if (medalhas_bronze.checked == true) {
+        medalhas = "bronze"
+    }
+
+
+    create_graph(pais1, pais2, pais3, genero, medalhas);
 
 }
 
@@ -301,10 +1338,12 @@ function filter() {
     }
     
     /*An array containing all the country names in the world:*/
-    var countries = ['Art Competitions Mixed Sculpturing, Unknown Event', 'Boxing Men’s Heavyweight', 'Sailing Mixed 20+ Ton', 'Wrestling Women’s Featherweight, Freestyle', 'Biathlon Men’s 12.5 kilometres Pursuit', 'Swimming Men’s Underwater Swimming', 'Military Ski Patrol Men’s Military Ski Patrol', 'Cycling Men’s Tandem Sprint, 2,000 metres', 'Canoeing Men’s Kayak Singles, Slalom', 'Snowboarding Women’s Giant Slalom', 'Short Track Speed Skating Women’s 500 metres', 'Fencing Women’s epee, Individual', 'Modern Pentathlon Men’s Individual', 'Shooting Men’s Free Pistol, 50 metres, Team', 'Weightlifting Men’s Featherweight', 'Cross Country Skiing Men’s 50 kilometres', 'Art Competitions Mixed Literature, Lyric Works', 'Rowing Women’s Lightweight Double Sculls', 'Wrestling Women’s Heavyweight, Freestyle', 'Athletics Women’s 1,500 metres', 'Cross Country Skiing Women’s 5/10 kilometres Pursuit', 'Polo Men’s Polo', 'Shooting Men’s Trap, Double Shot, 14 metres', 'Shooting Men’s Dueling Pistol, 30 metres', 'Alpine Skiing Women’s Slalom', 'Cycling Men’s 100 kilometres Team Time Trial', 'Wrestling Men’s Flyweight, Greco-Roman', 'Modern Pentathlon Men’s Team', 'Athletics Men’s Shot Put, Both Hands', 'Cross Country Skiing Women’s 4 x 5 kilometres Relay', 'Freestyle Skiing Men’s Slopestyle', 'Judo Women’s Lightweight', 'Canoeing Men’s Canadian Doubles, Slalom', 'Wrestling Men’s All-Around, Greco-Roman', 'Athletics Men’s 3 mile, Team', 'Swimming Men’s 440 yard Freestyle', 'Wrestling Men’s Heavyweight, Greco-Roman', 'Art Competitions Mixed Painting, Applied Arts', 'Luge Men’s Singles', 'Jeu De Paume Men’s Singles', 'Athletics Men’s 10 kilometres Walk', 'Weightlifting Men’s Heavyweight I', 'Shooting Women’s Small-Bore Rifle, Three Positions, 50 metres', 'Canoeing Women’s Kayak Fours, 500 metres', 'Shooting Men’s Military Rifle, 200/500/600/800/900/1,000 Yards, Team', 'Athletics Men’s 2,500 metres Steeplechase', 'Shooting Mixed Running Target, 50 metres', 'Art Competitions Mixed Sculpturing, Reliefs', 'Gymnastics Men’s Rope Climbing', 'Swimming Men’s 200 metres Individual Medley', 'Swimming Women’s 4 x 100 metres Freestyle Relay', 'Cycling Men’s Team Sprint', 'Cycling Men’s Madison', 'Canoeing Men’s Kayak Doubles, 10,000 metres', 'Athletics Men’s 5,000 metres, Team', 'Golf Men’s Team', 'Shooting Mixed Small-Bore Rifle, Prone, 50 metres', 'Shooting Men’s Free Pistol, 30 metres', 'Wrestling Men’s Light-Flyweight, Freestyle', 'Speed Skating Men’s Team Pursuit (8 laps)', 'Swimming Men’s 4 x 100 metres Freestyle Relay', 'Boxing Men’s Light-Heavyweight', 'Cycling Women’s 500 metres Time Trial', 'Swimming Men’s 1,500 metres Freestyle', 'Sailing Men’s Skiff', 'Weightlifting Women’s Flyweight', 'Archery Men’s Target Archery, 50 metres, Individual', 'Equestrianism Mixed Dressage, Individual', 'Shooting Men’s Military Rifle, 200 metres', 'Sailing Mixed Windsurfer', 'Athletics Women’s 800 metres', 'Biathlon Women’s 4 x 7.5 kilometres Relay', 'Judo Men’s Middleweight', 'Gymnastics Men’s Parallel Bars, Teams', 'Equestrianism Mixed Hacks And Hunter Combined', 'Alpine Skiing Men’s Giant Slalom', 'Athletics Women’s Javelin Throw', 'Handball Men’s Handball', 'Canoeing Men’s Canadian Doubles, 10,000 metres', 'Athletics Men’s Discus Throw', 'Archery Men’s Au Chapelet, 50 metres', 'Croquet Mixed Doubles', 'Cycling Women’s Omnium', 'Ski Jumping Men’s Large Hill, Team', 'Athletics Men’s All-Around Championship', 'Swimming Men’s 4,000 metres Freestyle', 'Swimming Men’s 200 metres Butterfly', 'Shooting Men’s Running Target, Double Shot', 'Canoeing Women’s Kayak Singles, Slalom', 'Rowing Men’s Coxed Pairs (1 kilometres)', 'Athletics Men’s Pole Vault', 'Athletics Women’s 100 metres', 'Swimming Men’s 200 metres Team Swimming', 'Taekwondo Women’s Flyweight', 'Shooting Women’s Air Rifle, 10 metres', 'Athletics Men’s 400 metres', 'Wrestling Men’s Bantamweight, Freestyle', 'Sailing Mixed 5.5 metres', 'Shooting Men’s Free Rifle, Three Positions, 300 metres, Team', 'Ice Hockey Men’s Ice Hockey', 'Wrestling Men’s Super-Heavyweight, Greco-Roman', 'Canoeing Men’s Kayak Doubles, 200 metres', 'Figure Skating Mixed Pairs', 'Swimming Women’s 800 metres Freestyle', 'Swimming Women’s 400 metres Freestyle', 'Swimming Men’s 4 x 200 metres Freestyle Relay', 'Shooting Men’s Military Rifle, 200, 400, 500 and 600 metres, Team', 'Athletics Women’s 200 metres', 'Diving Men’s Synchronized Platform', 'Rowing Men’s Coxed Fours', 'Gymnastics Men’s Parallel Bars', 'Alpine Skiing Men’s Slalom', 'Sailing Mixed Two Person Dinghy', 'Archery Men’s Target Archery, 50 metres, Team', 'Cycling Women’s Team Pursuit', 'Wrestling Women’s Middleweight, Freestyle', 'Archery Men’s Pole Archery, Small Birds, Individual', 'Weightlifting Women’s Middleweight', 'Athletics Women’s 400 metres', 'Archery Men’s Sur La Perche a La Pyramide', 'Equestrianism Mixed Jumping, Individual', 'Boxing Men’s Light-Welterweight', 'Swimming Women’s 200 metres Butterfly', 'Canoeing Men’s Canadian Singles, 500 metres', 'Triathlon Women’s Olympic Distance', 'Baseball Men’s Baseball', 'Biathlon Women’s 3 x 7.5 kilometres Relay', 'Shooting Men’s Military Rifle, Kneeling Or Standing, 300 metres', 'Luge Mixed (Men)’s Doubles', 'Archery Men’s Double American Round', 'Fencing Men’s Foil, Team', 'Tennis Men’s Doubles', 'Weightlifting Men’s Bantamweight', 'Gymnastics Men’s Team All-Around, Swedish System', 'Boxing Men’s Light-Flyweight', 'Alpine Skiing Women’s Combined', 'Shooting Men’s Dueling Pistol Au Commandement, 25 metres', 'Canoeing Men’s Canadian Singles, 10,000 metres', 'Wrestling Men’s Unlimited Class, Greco-Roman', 'Shooting Men’s Small-Bore Rifle, Prone, 50 metres', 'Speed Skating Women’s 1,500 metres', 'Cricket Men’s Cricket', 'Cross Country Skiing Women’s 3 x 5 kilometres Relay', 'Cross Country Skiing Men’s 15 kilometres', 'Bobsleigh Men’s Four', 'Art Competitions Mixed Architecture, Designs For Town Planning', 'Gymnastics Men’s Tumbling', 'Diving Men’s Synchronized Springboard', 'Fencing Men’s Foil, Masters, Individual', 'Alpine Skiing Men’s Downhill', 'Freestyle Skiing Women’s Moguls', 'Gymnastics Women’s Team Portable Apparatus', 'Biathlon Women’s 4 x 6 kilometres Relay', 'Handball Women’s Handball', 'Rugby Sevens Men’s Rugby Sevens', 'Racquets Men’s Singles', 'Tennis Men’s Doubles, Covered Courts', 'Swimming Men’s 500 metres Freestyle', 'Rowing Women’s Coxed Fours', 'Athletics Men’s Discus Throw, Greek Style', 'Luge Women’s Singles', 'Boxing Men’s Flyweight', 'Equestrianism Mixed Jumping, Team', 'Shooting Men’s Free Rifle, Any Position, 300 metres', 'Weightlifting Men’s All-Around Dumbbell Contest', 'Boxing Men’s Bantamweight', 'Shooting Men’s Running Target, Single And Double Shot', 'Motorboating Mixed A-Class (Open)', 'Athletics Men’s Cross-Country, Team', 'Swimming Men’s 10 kilometres Open Water', 'Triathlon Men’s Olympic Distance', 'Cross Country Skiing Women’s 15 kilometres', 'Weightlifting Women’s Light-Heavyweight', 'Rowing Men’s Coxed Fours, Inriggers', 'Art Competitions Mixed Sculpturing, Medals', 'Wrestling Men’s Bantamweight, Greco-Roman', 'Athletics Women’s 10,000 metres', 'Rugby Men’s Rugby', 'Figure Skating Men’s Special Figures', 'Table Tennis Women’s Team', 'Athletics Men’s Javelin Throw, Freestyle', 'Cycling Women’s BMX', 'Canoeing Men’s Kayak Singles, 10,000 metres', 'Swimming Men’s 400 metres Breaststroke', 'Archery Men’s Au Chapelet, 33 metres', 'Trampolining Men’s Individual', 'Cycling Men’s 2 mile', 'Shooting Men’s Small-Bore Rifle, Standing, 50 metres', 'Swimming Men’s Plunge For Distance', 'Shooting Men’s Free Pistol, 50 metres', 'Sailing Mixed 6.5 metres', 'Archery Women’s Double National Round', 'Hockey Men’s Hockey', 'Synchronized Swimming Women’s Solo', 'Basketball Men’s Basketball', 'Sailing Women’s Skiff', 'Shooting Mixed Free Rifle, Three Positions, 300 metres', 'Snowboarding Men’s Parallel Giant Slalom', 'Archery Men’s Target Archery, 33 metres, Team', 'Athletics Men’s Standing High Jump', 'Art Competitions Mixed Painting, Drawings And Water Colors', 'Cycling Men’s Mountainbike, Cross-Country', 'Modern Pentathlon Women’s Individual', 'Shooting Men’s Running Target, Double Shot, Team', 'Canoeing Men’s Kayak Singles, 1,000 metres', 'Sailing Mixed 12 metres', 'Cycling Men’s Road Race, Team', 'Cycling Women’s Mountainbike, Cross-Country', 'Athletics Men’s 4 x 400 metres Relay', 'Swimming Men’s 200 metres Freestyle', 'Sailing Men’s Two Person Keelboat', 'Speed Skating Women’s 3,000 metres', 'Shooting Men’s Unknown Event', 'Cycling Men’s 5 mile', 'Cross Country Skiing Women’s Team Sprint', 'Archery Men’s Unknown Event', 'Taekwondo Men’s Flyweight', 'Athletics Men’s 1,500 metres Walk', 'Athletics Women’s Discus Throw', 'Alpinism Mixed Alpinism', 'Athletics Men’s Triple Jump', 'Alpine Skiing Women’s Downhill', 'Athletics Men’s Shot Put', 'Art Competitions Mixed Music, Compositions For Orchestra', 'Boxing Men’s Lightweight', 'Rowing Men’s Double Sculls', 'Athletics Women’s Triple Jump', 'Shooting Mixed Trap', 'Athletics Men’s 200 metres', 'Badminton Men’s Doubles', 'Cross Country Skiing Men’s 30 kilometres', 'Judo Men’s Lightweight', 'Judo Men’s Open Class', 'Shooting Men’s Running Target, Single Shot', 'Swimming Men’s 100 Yard Backstroke', 'Swimming Men’s 440 Yard Breaststroke', 'Nordic Combined Men’s Team', 'Athletics Men’s Standing Triple Jump', 'Swimming Men’s 200 metres Breaststroke', 'Gymnastics Men’s Individual All-Around, 4 Events', 'Sailing Women’s Windsurfer', 'Shooting Men’s Military Rifle, Prone, 300 metres, Team', 'Athletics Women’s Marathon', 'Cross Country Skiing Women’s Sprint', 'Shooting Mixed Small-Bore Rifle, Three Positions, 50 metres', 'Athletics Men’s 4 mile, Team', 'Sailing Mixed 3-10 Ton', 'Judo Men’s Half-Heavyweight', 'Cycling Men’s 100 kilometres', 'Canoeing Women’s Kayak Singles, 200 metres', 'Basque Pelota Men’s Two-Man Teams With Cesta', 'Swimming Men’s 880 yard Freestyle', 'Sailing Mixed 8 metres', 'Cycling Women’s Road Race, Individual', 'Cycling Women’s Keirin', 'Speed Skating Men’s Allround', 'Volleyball Men’s Volleyball', 'Shooting Women’s Air Pistol, 10 metres', 'Curling Men’s Curling', 'Canoeing Men’s Canadian Doubles, 500 metres', 'Sailing Women’s Two Person Dinghy', 'Shooting Men’s Free Pistol, 25 metres', 'Shooting Men’s Free Rifle, Prone, 300 metres', 'Shooting Men’s Dueling Pistol Au Vise 20 metres', 'Art Competitions Mixed Unknown Event', 'Swimming Women’s 200 metres Backstroke', 'Sailing Mixed 12 foot', 'Cross Country Skiing Women’s 20 kilometres', 'Swimming Men’s 100 metres Freestyle For Sailors', 'Tug-Of-War Men’s Tug-Of-War', 'Freestyle Skiing Women’s Slopestyle', 'Alpine Skiing Men’s Super G', 'Nordic Combined Men’s Sprint', 'Aeronautics Mixed Aeronautics', 'Gymnastics Men’s Individual All-Around, Field Sports', 'Boxing Men’s Welterweight', 'Archery Men’s Target Archery, 33 metres, Individual', 'Wrestling Men’s Middleweight A, Greco-Roman', 'Equestrianism Men’s Jumping, Team', 'Athletics Women’s Heptathlon', 'Cycling Men’s 333 metres Time Trial', 'Weightlifting Women’s Super-Heavyweight', 'Cycling Women’s Points Race', 'Shooting Men’s Running Target, Single Shot, Team', 'Fencing Men’s Sabre, Team', 'Swimming Men’s 50 yard Freestyle', 'Shooting Men’s Running Target, 50 metres', 'Cross Country Skiing Women’s 15 km Skiathlon', 'Art Competitions Mixed Painting, Graphic Arts', 'Rowing Men’s Quadruple Sculls', 'Swimming Men’s 200 metres Obstacle Course', 'Shooting Men’s Small-Bore Rifle, Prone, 50 and 100 yards', 'Shooting Mixed Skeet', 'Art Competitions Mixed Literature, Epic Works', 'Cross Country Skiing Men’s 10 kilometres', 'Sailing Mixed Three Person Keelboat', 'Gymnastics Women’s Floor Exercise', 'Badminton Mixed Doubles', 'Fencing Women’s Foil, Team', 'Cycling Men’s Points Race', 'Shooting Men’s Military Revolver, 20 metres', 'Shooting Men’s Military Rifle, 300 metres and 600 metres, Prone, Team', 'Racquets Men’s Doubles', 'Snowboarding Women’s Slopestyle', 'Biathlon Men’s 4 x 7.5 kilometres Relay', 'Swimming Men’s 100 yard Freestyle', 'Athletics Men’s Marathon', 'Softball Women’s Softball', 'Swimming Women’s 4 x 100 metres Medley Relay', 'Canoeing Men’s Kayak Doubles, 500 metres', 'Athletics Men’s Javelin Throw', 'Canoeing Women’s Kayak Doubles, 500 metres', 'Wrestling Men’s Featherweight, Greco-Roman', 'Art Competitions Mixed Painting, Paintings', 'Athletics Women’s High Jump', 'Badminton Women’s Singles', 'Art Competitions Mixed Sculpturing', 'Tennis Mixed Doubles, Covered Courts', 'Speed Skating Women’s 5,000 metres', 'Equestrianism Mixed Four-In-Hand Competition', 'Swimming Women’s 100 metres Backstroke', 'Table Tennis Women’s Singles', 'Rowing Women’s Coxless Fours', 'Judo Men’s Extra-Lightweight', 'Gymnastics Men’s Individual All-Around', 'Archery Women’s Team Round', 'Sailing Mixed 7 metres', 'Gymnastics Women’s Balance Beam', 'Fencing Women’s Sabre, Individual', 'Sailing Men’s Windsurfer', 'Equestrianism Mixed Three-Day Event, Individual', 'Cycling Men’s 1/3 mile', 'Gymnastics Men’s Team All-Around, Free System', 'Luge Mixed Team Relay', 'Judo Men’s Half-Middleweight', 'Sailing Mixed Skiff', 'Wrestling Women’s Lightweight, Freestyle', 'Cycling Men’s Individual Time Trial', 'Swimming Women’s 200 metres Breaststroke', 'Athletics Men’s Discus Throw, Both Hands', 'Cycling Men’s Sprint', 'Alpine Skiing Women’s Giant Slalom', 'Wrestling Men’s Welterweight, Freestyle', 'Weightlifting Men’s Heavyweight II', 'Shooting Men’s Free Rifle, 1,000 Yards', 'Shooting Men’s Free Rifle, Standing, 300 metres', 'Archery Men’s Team', 'Art Competitions Mixed Architecture, Architectural Designs', 'Shooting Men’s Military Revolver, 1873-1874 Gras Model, 20 metres', 'Archery Men’s Target Archery, 28 metres, Individual', 'Athletics Men’s 800 metres', 'Weightlifting Men’s Middle-Heavyweight', 'Judo Women’s Half-Middleweight', 'Art Competitions Mixed Architecture, Unknown Event', 'Short Track Speed Skating Men’s 1,000 metres', 'Weightlifting Men’s Heavyweight', 'Biathlon Women’s 12.5 kilometres Mass Start', 'Athletics Women’s 80 metres Hurdles', 'Cross Country Skiing Men’s 18 kilometres', 'Rhythmic Gymnastics Women’s Individual', 'Gymnastics Women’s Team All-Around', 'Tennis Women’s Singles', 'Cross Country Skiing Men’s 10/15 kilometres Pursuit', 'Swimming Men’s One Mile Freestyle', 'Snowboarding Men’s Giant Slalom', 'Equestrianism Mixed Three-Day Event, Team', 'Fencing Men’s Single Sticks, Individual', 'Sailing Mixed 6 metres', 'Sailing Mixed 10-20 Ton', 'Biathlon Mixed 2 x 6 kilometres and 2 x 7.5 kilometres Relay', 'Swimming Women’s 200 metres Individual Medley', 'Athletics Men’s 60 metres', 'Fencing Women’s Foil, Individual', 'Athletics Men’s 1,500 metres', 'Short Track Speed Skating Women’s 1,500 metres', 'Archery Women’s Individual', 'Snowboarding Men’s Slopestyle', 'Shooting Men’s Military Rifle, Prone, 300 metres', 'Equestrianism Mixed Long Jump', 'Sailing Mixed Multihull', 'Athletics Women’s Shot Put', 'Ski Jumping Women’s Normal Hill, Individual', 'Rowing Women’s Double Sculls', 'Figure Skating Mixed Team', 'Equestrianism Men’s Vaulting, Individual', 'Taekwondo Women’s Featherweight', 'Gymnastics Women’s Uneven Bars', 'Boxing Men’s Featherweight', 'Swimming Women’s 100 metres Freestyle', 'Cross Country Skiing Men’s Team Sprint', 'Swimming Women’s 10 kilometres Open Water', 'Table Tennis Men’s Doubles', 'Athletics Men’s 3,000 metres, Team', 'Shooting Men’s Rapid-Fire Pistol, 25 metres', 'Biathlon Men’s 20 kilometres', 'Ice Hockey Women’s Ice Hockey', 'Fencing Men’s Sabre, Individual, Three Hits', 'Speed Skating Men’s 5,000 metres', 'Shooting Men’s Free Rifle, Prone, 600 metres', 'Archery Men’s Continental Style', 'Cycling Women’s Team Sprint', 'Table Tennis Men’s Team', 'Rowing Women’s Coxed Eights', 'Shooting Men’s Free Pistol, 50 yards, Team', 'Weightlifting Men’s Light-Heavyweight', 'Athletics Men’s 3,000 metres Walk', 'Swimming Men’s 1,000 metres Freestyle', 'Shooting Men’s Military Pistol, 25 metres', 'Shooting Men’s Small-Bore Rifle, Any Position, 50 metres', 'Rowing Men’s Coxless Fours', 'Cross Country Skiing Men’s 10/10 kilometres Pursuit', 'Shooting Men’s Military Rifle, Prone, 600 metres', 'Rhythmic Gymnastics Women’s Group', 'Wrestling Men’s Super-Heavyweight, Freestyle', 'Table Tennis Men’s Singles', 'Figure Skating Men’s Singles', 'Swimming Men’s 400 metres Freestyle', 'Fencing Men’s epee, Masters and Amateurs, Individual', 'Athletics Men’s High Jump', 'Athletics Women’s Hammer Throw', 'Equestrianism Men’s Three-Day Event, Team', 'Cycling Men’s 12-Hours Race', 'Shooting Men’s Free Rifle, 400, 600 and 800 metres, Team', 'Shooting Mixed Free Pistol, 50 metres', 'Shooting Men’s Double Trap', 'Sailing Mixed 30 metres', 'Archery Men’s Target Archery, 28 metres, Team', 'Art Competitions Mixed Music', 'Fencing Men’s epee, Masters, Individual', 'Athletics Women’s Long Jump', 'Athletics Men’s 3,200 metres Steeplechase', 'Swimming Men’s 100 metres Freestyle', 'Shooting Men’s Air Pistol, 10 metres', 'Archery Men’s Pole Archery, Large Birds, Team', 'Equestrianism Men’s Dressage, Individual', 'Equestrianism Men’s Three-Day Event, Individual', 'Wrestling Men’s Light-Flyweight, Greco-Roman', 'Canoeing Men’s Kayak Doubles, 1,000 metres', 'Motorboating Mixed C-Class', 'Swimming Men’s 220 yard Freestyle', 'Fencing Men’s Sabre, Masters, Individual', 'Swimming Men’s 50 metres Freestyle', 'Taekwondo Women’s Welterweight', 'Weightlifting Men’s Flyweight', 'Diving Men’s Plain High', 'Shooting Men’s Military Rifle, 1873-1874 Gras Model, Kneeling Or Standing, 200 metres', 'Tennis Women’s Singles, Covered Courts', 'Shooting Men’s Small-Bore Rifle, 50 and 100 yards, Team', 'Cross Country Skiing Men’s 30 km Skiathlon', 'Badminton Men’s Singles', 'Athletics Men’s Stone Throw', 'Sailing Mixed 0-0.5 Ton', 'Athletics Men’s 1,600 metres Medley Relay', 'Shooting Men’s Muzzle-Loading Pistol, 25 metres', 'Biathlon Women’s 10 kilometres Pursuit', 'Weightlifting Men’s Super-Heavyweight', 'Cycling Men’s Road Race, Individual', 'Art Competitions Mixed Sculpturing, Statues', 'Athletics Men’s 3,000 metres Steeplechase', 'Basketball Women’s Basketball', 'Archery Men’s Double York Round', 'Athletics Women’s 400 metres Hurdles', 'Athletics Women’s 4 x 400 metres Relay', 'Art Competitions Mixed Painting', 'Nordic Combined Men’s Normal Hill / 10 km, Individual', 'Canoeing Men’s Kayak Singles, 500 metres', 'Bobsleigh Men’s Two', 'Judo Men’s Heavyweight', 'Swimming Women’s 4 x 200 metres Freestyle Relay', 'Athletics Men’s 4,000 metres Steeplechase', 'Lacrosse Men’s Lacrosse', 'Art Competitions Mixed Sculpturing, Medals And Plaques', 'Cross Country Skiing Men’s Sprint', 'Speed Skating Men’s 10,000 metres', 'Weightlifting Men’s Middleweight', 'Cross Country Skiing Men’s 4 x 10 kilometres Relay', 'Rowing Men’s Single Sculls', 'Snowboarding Men’s Boardercross', 'Synchronized Swimming Women’s Duet', 'Gymnastics Men’s Individual All-Around, 5 Events', 'Canoeing Men’s Canadian Singles, 1,000 metres', 'Speed Skating Men’s 1,000 metres', 'Freestyle Skiing Women’s Aerials', 'Weightlifting Women’s Featherweight', 'Hockey Women’s Hockey', 'Shooting Men’s Free Rifle, Three Positions, 300 metres', 'Trampolining Women’s Individual', 'Rowing Men’s Coxed Pairs (1 mile)', 'Snowboarding Women’s Parallel Giant Slalom', 'Sailing Mixed 2-3 Ton', 'Weightlifting Women’s Heavyweight', 'Wrestling Men’s Heavyweight, Freestyle', 'Judo Women’s Half-Lightweight', 'Shooting Men’s Military Pistol, Team', 'Rowing Men’s Coxed Eights', 'Judo Women’s Half-Heavyweight', 'Sailing Mixed Open', 'Freestyle Skiing Men’s Halfpipe', 'Nordic Combined Men’s Large Hill / 10 km, Individual', 'Taekwondo Men’s Welterweight', 'Short Track Speed Skating Women’s 1,000 metres', 'Nordic Combined Men’s Individual', 'Cycling Women’s Individual Pursuit, 3,000 metres', 'Water Polo Men’s Water Polo', 'Wrestling Men’s Featherweight, Freestyle', 'Gymnastics Men’s Horizontal Bar, Teams', 'Wrestling Men’s Light-Heavyweight, Freestyle', 'Freestyle Skiing Men’s Ski Cross', 'Athletics Men’s Pentathlon', 'Canoeing Men’s Canadian Singles, 200 metres', 'Swimming Men’s 100 metres Breaststroke', 'Tennis Mixed Doubles', 'Diving Women’s Synchronized Platform', 'Football Men’s Football', 'Shooting Men’s Free Rifle, Kneeling, 300 metres', 'Shooting Women’s Double Trap', 'Sailing Mixed 0.5-1 Ton', 'Cycling Men’s 10,000 metres', 'Athletics Men’s Cross-Country, Individual', 'Archery Men’s Pole Archery, Small Birds, Team', 'Sailing Men’s One Person Heavyweight Dinghy', 'Swimming Men’s 1,200 metres Freestyle', 'Bobsleigh Men’s Four/Five', 'Athletics Men’s 10 mile Walk', 'Speed Skating Men’s 500 metres', 'Sailing Mixed 10 metres', 'Wrestling Men’s Flyweight, Freestyle', 'Water Polo Women’s Water Polo', 'Speed Skating Women’s Team Pursuit (6 laps)', 'Equestrianism Mixed Dressage, Team', 'Tennis Men’s Singles, Covered Courts', 'Tennis Women’s Doubles', 'Swimming Men’s 100 metres Backstroke', 'Fencing Men’s Foil, Individual', 'Cycling Men’s 1/2 mile', 'Cycling Men’s 1,000 metres Time Trial', 'Short Track Speed Skating Men’s 500 metres', 'Rowing Men’s 6-Man Naval Rowing Boats', 'Athletics Women’s 10 kilometres Walk', 'Athletics Men’s 10,000 metres', 'Figure Skating Mixed Ice Dancing', 'Rowing Men’s 17-Man Naval Rowing Boats', 'Sailing Mixed One Person Dinghy', 'Motorboating Mixed B-Class (Under 60 Feet)', 'Shooting Men’s Dueling Pistol, 30 metres, Team', 'Gymnastics Men’s Rings', 'Sailing Mixed Two Person Keelboat', 'Swimming Men’s 400 metres Individual Medley', 'Fencing Men’s epee, Team', 'Cross Country Skiing Women’s 10 kilometres', 'Shooting Men’s Small-Bore Rifle, Moving Target, 25 yards', 'Art Competitions Mixed Music, Instrumental And Chamber', 'Athletics Men’s 3,500 metres Walk', 'Art Competitions Mixed Painting, Unknown Event', 'Taekwondo Women’s Heavyweight', 'Snowboarding Women’s Halfpipe', 'Sailing Mixed Two Person Heavyweight Dinghy', 'Rowing Women’s Coxless Pairs', 'Sailing Men’s One Person Dinghy', 'Athletics Men’s Hammer Throw', 'Archery Women’s Double Columbia Round', 'Cycling Men’s Team Pursuit, 4,000 metres', 'Taekwondo Men’s Heavyweight', 'Cycling Men’s 25 mile', 'Shooting Men’s Running Target, 10 metres', 'Ski Jumping Men’s Normal Hill, Individual', 'Football Women’s Football', 'Archery Men’s Sur La Perche a La Herse', 'Rowing Women’s Quadruple Sculls', 'Cycling Men’s 20 kilometres', 'Equestrianism Mixed High Jump', 'Skeleton Women’s Skeleton', 'Boxing Women’s Lightweight', 'Snowboarding Men’s Parallel Slalom', 'Wrestling Women’s Flyweight, Freestyle', 'Athletics Women’s 3,000 metres Steeplechase', 'Shooting Men’s Small-Bore Rifle, Disappearing Target, 25 metres', 'Archery Men’s Championnat Du Monde', 'Athletics Women’s Pole Vault', 'Equestrianism Men’s Dressage, Team', 'Art Competitions Mixed Literature, Unknown Event', 'Speed Skating Women’s 1,000 metres', 'Weightlifting Men’s Lightweight', 'Snowboarding Women’s Boardercross', 'Snowboarding Men’s Halfpipe', 'Athletics Women’s 4 x 100 metres Relay', 'Taekwondo Men’s Featherweight', 'Cycling Men’s 50 kilometres', 'Sailing Mixed 1-2 Ton', 'Cycling Men’s 25 kilometres', 'Wrestling Men’s Middleweight B, Greco-Roman', 'Art Competitions Mixed Architecture', 'Shooting Men’s Small-Bore Rifle, Prone, 50 metres, Team', 'Shooting Women’s Trap', 'Boxing Men’s Middleweight', 'Archery Men’s Individual', 'Swimming Women’s 50 metres Freestyle', 'Cycling Men’s Keirin', 'Rowing Men’s Coxless Pairs', 'Athletics Men’s Standing Long Jump', 'Athletics Women’s 5,000 metres', 'Wrestling Men’s Light-Heavyweight, Greco-Roman', 'Croquet Mixed Singles, Two Balls', 'Athletics Men’s 100 metres', 'Freestyle Skiing Women’s Ski Cross', 'Sailing Men’s Two Person Dinghy', 'Shooting Women’s Skeet', 'Beach Volleyball Men’s Beach Volleyball', 'Ski Jumping Men’s Large Hill, Individual', 'Fencing Women’s epee, Team', 'Swimming Women’s 200 metres Freestyle', 'Diving Women’s Platform', 'Gymnastics Men’s Side Horse', 'Sailing Mixed 40 metres', 'Shooting Men’s Military Rifle, Standing, 300 metres, Team', 'Athletics Men’s 5 mile', 'Volleyball Women’s Volleyball', 'Rowing Women’s Single Sculls', 'Wrestling Men’s Lightweight, Freestyle', 'Shooting Men’s Air Rifle, 10 metres', 'Canoeing Men’s Kayak Fours, 1,000 metres', 'Shooting Men’s Military Rifle, Standing, 300 metres', 'Archery Men’s Au Cordon Dore, 50 metres', 'Gymnastics Men’s Horizontal Bar', 'Wrestling Men’s Lightweight, Greco-Roman', 'Boxing Men’s Light-Middleweight', 'Diving Women’s Synchronized Springboard', 'Diving Men’s Springboard', 'Shooting Men’s Small-Bore Rifle, Disappearing Target, 25 yards', 'Golf Men’s Individual', 'Diving Men’s Platform', 'Cycling Women’s Individual Time Trial', 'Athletics Men’s 56-pound Weight Throw', 'Bobsleigh Women’s Two', 'Athletics Men’s 4 x 100 metres Relay', 'Weightlifting Men’s Unlimited, One Hand', 'Short Track Speed Skating Men’s 5,000 metres Relay', 'Gymnastics Men’s Team All-Around', 'Wrestling Men’s Middleweight, Greco-Roman', 'Golf Women’s Individual', 'Table Tennis Women’s Doubles', 'Biathlon Men’s 15 kilometres Mass Start', 'Athletics Men’s Javelin Throw, Both Hands', 'Swimming Women’s 100 metres Butterfly', 'Athletics Men’s 50 kilometres Walk', 'Shooting Men’s Small Bore-Rifle, Standing, 50 metres, Team', 'Art Competitions Mixed Music, Unknown Event', 'Weightlifting Men’s Unlimited, Two Hands', 'Short Track Speed Skating Women’s 3,000 metres Relay', 'Rowing Men’s Coxed Pairs', 'Archery Men’s Team Round', 'Fencing Women’s Sabre, Team', 'Short Track Speed Skating Men’s 1,500 metres', 'Judo Men’s Half-Lightweight', 'Rowing Men’s Lightweight Double Sculls', 'Sailing Women’s Three Person Keelboat', 'Freestyle Skiing Women’s Halfpipe', 'Figure Skating Women’s Singles', 'Swimming Men’s 4 x 100 metres Medley Relay', 'Canoeing Men’s Canadian Doubles, 1,000 metres', 'Tennis Men’s Singles', 'Canoeing Men’s Kayak Relay 4 x 500 metres', 'Biathlon Women’s 15 kilometres', 'Swimming Men’s 4 x 50 Yard Freestyle Relay', 'Archery Women’s Team', 'Cycling Men’s 1/4 mile', 'Canoeing Men’s Canadian Singles, Slalom', 'Cross Country Skiing Women’s 5/5 kilometres Pursuit', 'Gymnastics Men’s Club Swinging', 'Athletics Men’s 2,590 metres Steeplechase', 'Gymnastics Women’s Individual All-Around', 'Athletics Men’s Decathlon', 'Athletics Men’s 20 kilometres Walk', 'Sailing Women’s One Person Dinghy', 'Judo Women’s Extra-Lightweight', 'Shooting Men’s Trap, Single Shot, 16 metres', 'Beach Volleyball Women’s Beach Volleyball', 'Rowing Men’s Lightweight Coxless Fours', 'Swimming Men’s 100 metres Butterfly', 'Canoeing Women’s Kayak Singles, 500 metres', 'Synchronized Swimming Women’s Team', 'Freestyle Skiing Men’s Moguls', 'Gymnastics Men’s Individual All-Around, Apparatus Work', 'Athletics Men’s 200 metres Hurdles', 'Athletics Men’s 5,000 metres', 'Freestyle Skiing Men’s Aerials', 'Wrestling Men’s Middleweight, Freestyle', 'Swimming Men’s 200 metres Backstroke', 'Shooting Men’s Free Pistol, 50 yards', 'Art Competitions Mixed Literature, Dramatic Works', 'Croquet Mixed Singles, One Ball', 'Weightlifting Women’s Lightweight', 'Cycling Men’s 1 mile', 'Archery Men’s Au Cordon Dore, 33 metres', 'Archery Men’s Pole Archery, Large Birds, Individual', 'Roque Men’s Singles', 'Art Competitions Mixed Literature', 'Cycling Men’s Individual Pursuit, 4,000 metres', 'Shooting Men’s Trap', 'Swimming Women’s 300 metres Freestyle', 'Art Competitions Mixed Sculpturing, Medals And Reliefs', 'Athletics Women’s 100 metres Hurdles', 'Athletics Women’s 20 kilometres Walk', 'Athletics Men’s 110 metres Hurdles', 'Athletics Men’s Long Jump', 'Shooting Mixed Rapid-Fire Pistol, 25 metres', 'Skeleton Men’s Skeleton', 'Diving Women’s Plain High', 'Rowing Men’s Coxed Fours, Outriggers', 'Athletics Men’s Pentathlon (Ancient)', 'Swimming Men’s 4 x 250 metres Freestyle Relay', 'Shooting Men’s Small-Bore Rifle, Three Positions, 50 metres', 'Cross Country Skiing Women’s 5 kilometres', 'Sailing Mixed 18 foot', 'Fencing Men’s epee, Individual', 'Speed Skating Women’s 500 metres', 'Gymnastics Men’s Floor Exercise', 'Shooting Men’s Small-Bore Rifle, Disappearing Target, 25 metres, Team', 'Athletics Men’s 400 metres Hurdles', 'Shooting Men’s Military Rifle, Prone, 600 metres, Team', 'Rugby Sevens Women’s Rugby Sevens', 'Biathlon Women’s 7.5 kilometres Sprint', 'Swimming Women’s 400 metres Individual Medley', 'Gymnastics Men’s Pommelled Horse', 'Judo Women’s Middleweight', 'Cycling Women’s Sprint', 'Fencing Men’s Sabre, Individual', 'Cycling Men’s BMX', 'Boxing Women’s Flyweight', 'Gymnastics Women’s Horse Vault', 'Art Competitions Mixed Music, Vocals', 'Wrestling Women’s Light-Heavyweight, Freestyle', 'Swimming Women’s 100 metres Breaststroke', 'Badminton Women’s Doubles', 'Art Competitions Mixed Music, Compositions For Solo Or Chorus', 'Shooting Men’s Trap, Team', 'Gymnastics Men’s Horse Vault', 'Diving Women’s Springboard', 'Shooting Men’s Skeet', 'Athletics Women’s Pentathlon', 'Shooting Men’s Military Rifle, Three Positions, 300 metres', 'Shooting Women’s Sporting Pistol, 25 metres', 'Cycling Men’s Team Pursuit, 1,980 yards', 'Shooting Men’s Military Rifle, Any Position, 600 metres', 'Alpine Skiing Men’s Combined', 'Athletics Women’s 3,000 metres', 'Equestrianism Men’s Jumping, Individual', 'Rowing Women’s Coxed Quadruple Sculls', 'Boxing Women’s Middleweight', 'Canoeing Men’s Kayak Singles, 200 metres', 'Cross Country Skiing Women’s 30 kilometres', 'Shooting Men’s Military Pistol, 30 metres', 'Judo Women’s Heavyweight', 'Boxing Men’s Super-Heavyweight', 'Canoeing Men’s Folding Kayak Doubles, 10 kilometres', 'Wrestling Men’s Welterweight, Greco-Roman', 'Equestrianism Men’s Vaulting, Team', 'Curling Women’s Curling', 'Snowboarding Women’s Parallel Slalom', 'Speed Skating Men’s 1,500 metres', 'Alpine Skiing Women’s Super G', 'Cycling Men’s Omnium', 'Canoeing Men’s Folding Kayak Singles, 10 kilometres', 'Cycling Men’s 5,000 metres', 'Biathlon Men’s 10 kilometres Sprint']
-
+    var countries = ['Ethiopia', 'Nepal', 'Rwanda', 'Cambodia', 'Chad', 'Marshall Islands', 'India', 'Netherlands', 'Uruguay', 'Burundi', 'Virgin Islands, US', 'American Samoa', 'Guyana', 'Kiribati', 'Luxembourg', 'Paraguay', 'Benin', 'Samoa', 'Afghanistan', 'Micronesia', 'Liechtenstein', 'San Marino', 'Laos', 'Venezuela', 'El Salvador', 'Guinea', 'Guam', 'Bermuda', 'Andorra', 'Israel', 'Gambia', 'Panama', 'Suriname', 'Timor-Leste', 'Serbia', 'Grenada', 'Belarus', 'Equatorial Guinea', 'Malaysia', 'Poland', 'Austria', 'Philippines', 'China', 'Zimbabwe', 'Yemen', 'Bosnia and Herzegovina', 'Myanmar', 'Democratic Republic of the Congo', 'Ireland', 'Monaco', 'Haiti', 'Somalia', 'Turkmenistan', 'South Korea', 'Nigeria', 'Barbados', 'Papua New Guinea', 'Zambia', 'Swaziland', 'Oman', 'Morocco', 'Palau', 'Liberia', 'Eritrea', 'Finland', 'Albania', 'France', 'Trinidad', 'Lebanon', 'Cuba', 'Hungary', 'Guatemala', 'South Sudan', 'USA', 'Argentina', 'Libya', 'Vanuatu', 'Ghana', 'Iraq', 'Moldova', 'Mauritius', 'Nicaragua', 'Tanzania', 'Antigua', 'Namibia', 'Russia', 'Pakistan', 'Cayman Islands', 'Iceland', 'Jordan', 'South Africa', 'Belize', 'Angola', 'Saint Lucia', 'Taiwan', 'Madagascar', 'Japan', 'Kyrgyzstan', 'Kenya', 'Chile', 'Boliva', 'Brunei', 'Ivory Coast', 'Sweden', 'United Arab Emirates', 'Slovenia', 'Saint Kitts', 'Iran', 'Turkey', 'Singapore', 'Greece', 'Kosovo', 'Tajikistan', 'Italy', 'Vietnam', 'Colombia', 'Togo', 'Belgium', 'Seychelles', 'Bahamas', 'Cyprus', 'Curacao', 'Czech Republic', 'Botswana', 'Nauru', 'North Korea', 'Macedonia', 'Sao Tome and Principe', 'Mozambique', 'Peru', 'Sudan', 'Thailand', 'Brazil', 'Sierra Leone', 'Norway', 'Solomon Islands', 'Azerbaijan', 'Armenia', 'Kazakhstan', 'Uganda', 'Denmark', 'Tunisia', 'Egypt', 'Saudi Arabia', 'Fiji', 'Comoros', 'Ecuador', 'Romania', 'Cameroon', 'Bhutan', 'Bahrain', 'Georgia', 'Individual Olympic Athletes', 'Mauritania', 'Maldives', 'Mongolia', 'Saint Vincent', 'Costa Rica', 'Djibouti', 'Dominica', 'Dominican Republic', 'Virgin Islands, British', 'Gabon', 'Central African Republic', 'Malawi', 'Algeria', 'Lithuania', 'Tonga', 'Bulgaria', 'Palestine', 'UK', 'Ukraine', 'Croatia', 'Germany', 'Guinea-Bissau', 'Malta', 'Portugal', 'Republic of Congo', 'Mali', 'Niger', 'Qatar', 'Latvia', 'Canada', 'Australia', 'Slovakia', 'Cook Islands', 'New Zealand', 'Spain', 'Lesotho', 'Puerto Rico', 'Jamaica', 'Senegal', 'Indonesia', 'Uzbekistan', 'Burkina Faso', 'Aruba', 'Sri Lanka', 'Montenegro', 'Syria', 'Cape Verde', 'Honduras', 'Estonia', 'Mexico', 'Bangladesh', 'Kuwait', 'Switzerland']
     /*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
-    autocomplete(document.getElementById("myInput"), countries);
+    autocomplete(document.getElementById("pais1"), countries);
+    autocomplete(document.getElementById("pais2"), countries);
+    autocomplete(document.getElementById("pais3"), countries);
+
 </script>
 
 </body>
