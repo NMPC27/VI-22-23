@@ -72,6 +72,21 @@
     background-color: DodgerBlue !important; 
     color: #ffffff; 
   }
+
+  div.tooltip {   
+    position: absolute;
+    display: inline-block;
+    margin-top: 10vw;
+    margin-left: 22vw;
+    padding: 7px;
+    font-size: 0.8em;
+    pointer-events: none;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 3px 3px 10px 0px rgba(0, 0, 0, 0.25);
+    z-index: 3;
+  } 
   
   </style>
 </head>
@@ -124,15 +139,6 @@ padding-top: 2vw;">
                 </div>
                 <hr class="rounded" style="width: 17vw;">
 
-                <p>Género</p>
-                <input type="radio" id="all" name="gender" value="all">
-                <label for="all">Todos</label><br>
-                <input type="radio" id="m" name="gender" value="m">
-                <label for="m">Homens</label><br>  
-                <input type="radio" id="f" name="gender" value="f">
-                <label for="f">Mulheres</label>
-                <hr class="rounded" style="width: 17vw;">
-
                 <p>Medalhas</p>
                 <input type="radio" id="any" name="medals" value="any">
                 <label for="any">Todos</label><br>
@@ -142,6 +148,8 @@ padding-top: 2vw;">
                 <label for="silver">Prata</label><br>  
                 <input type="radio" id="bronze" name="medals" value="bronze">
                 <label for="bronze">Bronze</label><br>
+                <input type="radio" id="nan" name="medals" value="nan">
+                <label for="nan">Nan</label><br>
 
                 <br>
 
@@ -160,14 +168,11 @@ function filter() {
 
     var modalidade = document.getElementById("myInput").value;
 
-    var genero_all = document.getElementById("all");
-    var genero_m = document.getElementById("m");
-    var genero_f = document.getElementById("f");
-
     var medalhas_any = document.getElementById("any");
     var medalhas_gold = document.getElementById("gold");
     var medalhas_silver = document.getElementById("silver");
     var medalhas_bronze = document.getElementById("bronze");
+    var medalhas_nan = document.getElementById("nan");
 
     if (modalidade == "") {
         alert("Modalidade não selecionada");
@@ -179,19 +184,14 @@ function filter() {
         return
     }
     
-    if (genero_all.checked == false && genero_m.checked == false && genero_f.checked == false) {
-        alert("Género não selecionado");
-        return
-    } 
-    
-    if (medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false) {
+    if (medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false && medalhas_nan.checked == false) {
         alert("Medalhas não selecionadas");
         return
     }
 
     modalidade = modalidade.replace("’", "'");
 
-    update_chart(modalidade, genero_all.checked, genero_m.checked, genero_f.checked, medalhas_any.checked, medalhas_gold.checked, medalhas_silver.checked, medalhas_bronze.checked);
+    update_chart(modalidade, medalhas_any.checked, medalhas_gold.checked, medalhas_silver.checked, medalhas_bronze.checked,medalhas_nan.checked);
 
 
 }
@@ -272,43 +272,29 @@ function filter() {
             .attr("width",x.bandwidth())
     })
 
-  function update_chart(modalidade,genero_all,genero_m,genero_f,medalhas_any,medalhas_gold,medalhas_silver,medalhas_bronze) {
+  function update_chart(modalidade,medalhas_any,medalhas_gold,medalhas_silver,medalhas_bronze,medalhas_nan) {
 
-    // clean the map
-    document.getElementById("my_svg").remove();
+  console.log(medalhas_nan)
 
-    // set the dimensions and margins of the graph
-    const margin = {top: 10, right: 30, bottom: 20, left: 50},
-      width = 875 - margin.left - margin.right,
-      height = 575 - margin.top - margin.bottom;
-    
-    // append the svg object to the body of the page
-    const svg = d3.select("#my_dataviz")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .attr("id", "my_svg")
-      .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-    
-    // Parse the Data
+  document.getElementById("my_svg").remove();
 
-    var file=""
-    if (genero_all){
-      file="data/modalities/all_medals.csv"
-    }else if (genero_m){
-      file="./data/modalities/males_medals.csv"
-    }else if (genero_f){
-      file="./data/modalities/females_medals.csv"
-    }
+  // set the dimensions and margins of the graph
+  const margin = {top: 10, right: 30, bottom: 20, left: 50},
+    width = 875 - margin.left - margin.right,
+    height = 575 - margin.top - margin.bottom;
 
-    d3.csv(file).then( function(data) {
-    
+  // append the svg object to the body of the page
+  const svg = d3.select("#my_dataviz")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("id", "my_svg")
+    .append("g")
+      .attr("transform",`translate(${margin.left},${margin.top})`);
 
-    
-      // List of groups = species here = value of the first column called group -> I show them on the X axis
+  // Parse the Data
+  d3.csv("data/modalities/all_medals.csv").then( function(data) {
 
-      
       var newData=[]
       var allData=[]
       for (let i = 0; i < data.length; i++) {
@@ -316,82 +302,119 @@ function filter() {
           newData.push(data[i].country)
           
           if (medalhas_any){
-            allData.push({'country': data[i].country, 'bronze': data[i].bronze, 'silver': data[i].silver, 'gold': data[i].gold})
+            allData.push({'country': data[i].country,'nan':data[i].nan , 'bronze': data[i].bronze, 'silver': data[i].silver, 'gold': data[i].gold})
           }
           else if(medalhas_gold){
-            allData.push({'country': data[i].country, 'bronze': 0, 'silver': 0, 'gold': data[i].gold})
+            allData.push({'country': data[i].country,'nan':0 , 'bronze': 0, 'silver': 0, 'gold': data[i].gold})
           }
           else if(medalhas_silver){
-            allData.push({'country': data[i].country, 'bronze': 0, 'silver': data[i].silver, 'gold': 0})
+            allData.push({'country': data[i].country,'nan':0 , 'bronze': 0, 'silver': data[i].silver, 'gold': 0})
           }
           else if(medalhas_bronze){
-            allData.push({'country': data[i].country, 'bronze': data[i].bronze, 'silver': 0, 'gold': 0})
+            allData.push({'country': data[i].country,'nan':0 , 'bronze': data[i].bronze, 'silver': 0, 'gold': 0})
           }
-
-
-          
+          else if(medalhas_nan){
+            allData.push({'country': data[i].country,'nan':data[i].nan , 'bronze': 0, 'silver': 0, 'gold': 0})
+          }
         }
       }
 
-      // List of subgroups = header of the csv files = soil condition here
-      const subgroups = data.columns.slice(2)
+      console.log(allData)
 
-      const groups = newData
-    
-      // Add X axis
-      const x = d3.scaleBand()
-          .domain(groups)
-          .range([0, width])
-          .padding([0.2])
-      svg.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0));
-    
+    // List of subgroups = header of the csv files = soil condition here
+    const subgroups = data.columns.slice(2)
 
-      var max=0
+    // List of groups = species here = value of the first column called group -> I show them on the X axis
+    const groups = newData
+
+    // Add X axis
+    const x = d3.scaleBand()
+        .domain(groups)
+        .range([0, width])
+        .padding([0.2])
+    svg.append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(x).tickSizeOuter(0));
+
+    var max=0
       for (let i = 0; i < allData.length; i++) {
-        tmp=parseInt(allData[i].bronze)+parseInt(allData[i].silver)+parseInt(allData[i].gold)
+        tmp=parseInt(allData[i].nan)+parseInt(allData[i].bronze)+parseInt(allData[i].silver)+parseInt(allData[i].gold)
         if (tmp>max){
           max=tmp
         }
-      }
+    }
 
-      // Add Y axis
-      const y = d3.scaleLinear()
-        .domain([0, max+10])
-        .range([ height, 0 ]);
-      svg.append("g")
-        .call(d3.axisLeft(y));
-    
-      // color palette = one color per subgroup
-      const color = d3.scaleOrdinal()
-        .domain(subgroups)
-        .range(['#CD7F32','#C0C0C0','#FFD700'])
-    
-      //stack the data? --> stack per subgroup
-      const stackedData = d3.stack()
-        .keys(subgroups)
-        (allData)
-    
-      // Show the bars
-      svg.append("g")
-        .selectAll("g")
-        // Enter in the stack data = loop key per key = group per group
-        .data(stackedData)
-        .join("g")
-          .attr("fill", d => color(d.key))
-          .selectAll("rect")
-          // enter a second time = loop subgroup per subgroup to add all rectangles
-          .data(d => d)
-          .join("rect")
-            .attr("x", d => x(d.data.country))
-            .attr("y", d => y(d[1]))
-            .attr("height", d => y(d[0]) - y(d[1]))
-            .attr("width",x.bandwidth())
-    })
-  }
+    // Add Y axis
+    const y = d3.scaleLinear()
+      .domain([0, max+5])
+      .range([ height, 0 ]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    console.log(subgroups)
+    // color palette = one color per subgroup
+    const color = d3.scaleOrdinal()
+      .domain(subgroups)
+      .range(['#000000','#CD7F32','#C0C0C0','#FFD700'])
+
+    //stack the data? --> stack per subgroup
+    const stackedData = d3.stack()
+      .keys(subgroups)
+      (allData)
+
+
+    // ----------------
+    // Create a tooltip
+    // ----------------
+    const tooltip = d3.select("#my_dataviz")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    // Three function that change the tooltip when user hover / move / leave a cell
+    const mouseover = function(event, d) {
+      const subgroupName = d3.select(this.parentNode).datum().key;
+      const subgroupValue = d.data[subgroupName];
+      tooltip
+          .html("Medalha: " + subgroupName + "<br>" + "Value: " + subgroupValue)
+          .style("opacity", 1)
+
+    }
+    const mousemove = function(event, d) {
+      tooltip.style("transform","translateY(-55%)")
+            .style("left",(event.x)/2+"px")
+            .style("top",(event.y)/2-30+"px")
+    }
+    const mouseleave = function(event, d) {
+      tooltip
+        .style("opacity", 0)
+    }
+
+    // Show the bars
+    svg.append("g")
+      .selectAll("g")
+      // Enter in the stack data = loop key per key = group per group
+      .data(stackedData)
+      .join("g")
+        .attr("fill", d => color(d.key))
+        .selectAll("rect")
+        // enter a second time = loop subgroup per subgroup to add all rectangles
+        .data(d => d)
+        .join("rect")
+          .attr("x", d =>  x(d.data.country))
+          .attr("y", d => y(d[1]))
+          .attr("height", d => y(d[0]) - y(d[1]))
+          .attr("width",x.bandwidth())
+          .attr("stroke", "grey")
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave)
+
+  })
   
-  </script>
+}
+
+</script>
 
 <script>
     function autocomplete(inp, arr) {

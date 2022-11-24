@@ -1,88 +1,42 @@
-import csv
-import copy
+# importing module
+from pandas import *
 
+import json
 
-#females
-# group,Nitrogen,normal,stress
-# banana,12,1,13
+# reading CSV file
+data = read_csv("athlete_events.csv")
 
+# converting column data to list
+events = data['Event'].tolist()
+noc = data['NOC'].tolist()
+medal = data['Medal'].tolist()
+
+# creating dictionary
 dict = dict()
 
-with open("females_by_event_bronze.csv", 'r') as file:
-  bronze = csv.reader(file)
 
-  with open("females_by_event_silver.csv", 'r') as file2:
-    silver = csv.reader(file2)
+for i in range(len(events)):
 
-    with open("females_by_event_gold.csv", 'r') as file3:
-        gold = csv.reader(file3)
+    if events[i] not in dict:
+        dict[events[i]] = {}
 
-        for row in bronze:
-            if row == []:
-                continue
+    if noc[i] not in dict[events[i]]:
+        dict[events[i]][noc[i]] = {} 
+        dict[events[i]][noc[i]]["nan"] = 0
+        dict[events[i]][noc[i]]["Bronze"] = 0
+        dict[events[i]][noc[i]]["Silver"] = 0
+        dict[events[i]][noc[i]]["Gold"] = 0
 
-            dict[row[1]] = {}
-
-            dict[row[1]][row[0]] = {}
-
-            dict[row[1]][row[0]]["bronze"] = row[2]
-
-        for row in silver:
-            if row == []:
-                continue
-            
-            if not row[1] in dict:
-                dict[row[1]] = {}
-
-            if not row[0] in dict[row[1]]:
-                dict[row[1]][row[0]] = {}
-
-            dict[row[1]][row[0]]["silver"] = row[2]
-
-        for row in gold:
-            if row == []:
-                continue
-            
-            if not row[1] in dict:
-                dict[row[1]] = {}
-
-            if not row[0] in dict[row[1]]:
-                dict[row[1]][row[0]] = {}
-
-            dict[row[1]][row[0]]["gold"] = row[2]
+    dict[events[i]][noc[i]][str(medal[i])] += 1
 
 
-        for key in dict:
-            for key2 in dict[key]:
+with open('demo.csv', 'w') as out:
+    
+    for key in dict:
+        for key2 in dict[key]:
 
-                if not "bronze" in dict[key][key2]:
-                    dict[key][key2]['bronze'] = "0"
-
-                if not "silver" in dict[key][key2]:
-                    dict[key][key2]['silver'] = "0"
-                
-                if not "gold" in dict[key][key2]:
-                    dict[key][key2]['gold'] = "0"
-
-        print(dict)
+            out.write(key + "," + key2 + "," + str(dict[key][key2]["nan"]) + ","  + str(dict[key][key2]["Bronze"]) + "," + str(dict[key][key2]["Silver"]) + "," + str(dict[key][key2]["Gold"]) + "\n")
 
 
-        with open('females_medals.csv', 'w') as out:
-            writer = csv.writer(out)
-
-
-            writer.writerow(['event', 'country', 'bronze', 'silver', 'gold', 'all'])
-
-            for key in dict:
-                for key2 in dict[key]:
-
-                    bronze=copy.deepcopy(dict[key][key2]['bronze'])
-                    silver=copy.deepcopy(dict[key][key2]['silver'])
-                    gold=copy.deepcopy(dict[key][key2]['gold'])
-
-
-                    total = int(bronze) + int(silver) + int(gold)
-
-                    writer.writerow([key, key2, dict[key][key2]['bronze'], dict[key][key2]['silver'], dict[key][key2]['gold']])
 
 
