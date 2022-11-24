@@ -72,12 +72,12 @@
     background-color: DodgerBlue !important; 
     color: #ffffff; 
   }
+  </style>
 
+<style>
+  
   div.tooltip {   
     position: absolute;
-    display: inline-block;
-    margin-top: 10vw;
-    margin-left: 22vw;
     padding: 7px;
     font-size: 0.8em;
     pointer-events: none;
@@ -85,10 +85,9 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 3px 3px 10px 0px rgba(0, 0, 0, 0.25);
-    z-index: 3;
-  } 
-  
-  </style>
+  }
+</style>
+
 </head>
 <body>
 
@@ -102,7 +101,7 @@
     <a href="index.html"  class="w3-bar-item w3-button w3-hover-blue">Home</a> 
     <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Mapa</a> 
     <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalidades</a> 
-    <a href="ages.html"  class="w3-bar-item w3-button w3-hover-green">Idades</a> 
+    <a href="performance.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
     <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Autores</a> 
   </div>
 </nav>
@@ -140,6 +139,7 @@ padding-top: 2vw;">
                 <hr class="rounded" style="width: 17vw;">
 
                 <p>Medalhas</p>
+                
                 <input type="radio" id="any" name="medals" value="any">
                 <label for="any">Todos</label><br>
                 <input type="radio" id="gold" name="medals" value="gold">
@@ -149,11 +149,12 @@ padding-top: 2vw;">
                 <input type="radio" id="bronze" name="medals" value="bronze">
                 <label for="bronze">Bronze</label><br>
                 <input type="radio" id="nan" name="medals" value="nan">
-                <label for="nan">Nan</label><br>
+                <label for="nan">Não Medalhados</label><br>
+                
 
-                <br>
+                <svg id="my_dataviz3" height=300 width=450></svg>
 
-                <input type="submit" value="Submit" style="margin-left: 12vw;" onclick="filter()">
+                <input type="submit" value="Submit" style="margin-left: 13vw;" onclick="filter()">
 
             </div>
             
@@ -212,6 +213,7 @@ function filter() {
         .attr("id", "my_svg")
       .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
+      
     
     // Parse the Data
 
@@ -274,8 +276,6 @@ function filter() {
 
   function update_chart(modalidade,medalhas_any,medalhas_gold,medalhas_silver,medalhas_bronze,medalhas_nan) {
 
-  console.log(medalhas_nan)
-
   document.getElementById("my_svg").remove();
 
   // set the dimensions and margins of the graph
@@ -292,14 +292,18 @@ function filter() {
     .append("g")
       .attr("transform",`translate(${margin.left},${margin.top})`);
 
+
+
   // Parse the Data
   d3.csv("data/modalities/all_medals.csv").then( function(data) {
+
+
 
       var newData=[]
       var allData=[]
       for (let i = 0; i < data.length; i++) {
+        //console.log(data[i].event)
         if (data[i].event==modalidade){
-          newData.push(data[i].country)
           
           if (medalhas_any){
             allData.push({'country': data[i].country,'nan':data[i].nan , 'bronze': data[i].bronze, 'silver': data[i].silver, 'gold': data[i].gold})
@@ -319,7 +323,38 @@ function filter() {
         }
       }
 
-      console.log(allData)
+
+      var dict = {};
+
+      for (let i = 0; i < allData.length; i++) {
+        total = parseInt(allData[i].bronze) + parseInt(allData[i].silver) + parseInt(allData[i].gold)
+        dict[allData[i].country] = total;
+      }
+
+      // Create items array
+      var items = Object.keys(dict).map(function(key) {
+        return [key, dict[key]];
+      });
+
+      // Sort the array based on the second element
+      items.sort(function(first, second) {
+        return second[1] - first[1];
+      });
+
+
+      items=items.slice(0, 30)
+
+
+      newcap = []
+      for(let j = 0; j < items.length; j++){
+        for(let i = 0; i < allData.length; i++){
+          if(allData[i].country == items[j][0]){
+            newcap.push(allData[i])
+            newData.push(allData[i].country)
+          }
+        }
+      }
+
 
     // List of subgroups = header of the csv files = soil condition here
     const subgroups = data.columns.slice(2)
@@ -337,8 +372,8 @@ function filter() {
       .call(d3.axisBottom(x).tickSizeOuter(0));
 
     var max=0
-      for (let i = 0; i < allData.length; i++) {
-        tmp=parseInt(allData[i].nan)+parseInt(allData[i].bronze)+parseInt(allData[i].silver)+parseInt(allData[i].gold)
+      for (let i = 0; i < newcap.length; i++) {
+        tmp=parseInt(newcap[i].nan)+parseInt(newcap[i].bronze)+parseInt(newcap[i].silver)+parseInt(newcap[i].gold)
         if (tmp>max){
           max=tmp
         }
@@ -351,7 +386,6 @@ function filter() {
     svg.append("g")
       .call(d3.axisLeft(y));
 
-    console.log(subgroups)
     // color palette = one color per subgroup
     const color = d3.scaleOrdinal()
       .domain(subgroups)
@@ -360,14 +394,14 @@ function filter() {
     //stack the data? --> stack per subgroup
     const stackedData = d3.stack()
       .keys(subgroups)
-      (allData)
+      (newcap)
 
 
     // ----------------
     // Create a tooltip
     // ----------------
-    const tooltip = d3.select("#my_dataviz")
-      .append("div")
+
+    const tooltip = d3.select("body").append("div")
       .attr("class", "tooltip")
       .style("opacity", 0);
 
@@ -375,19 +409,35 @@ function filter() {
     const mouseover = function(event, d) {
       const subgroupName = d3.select(this.parentNode).datum().key;
       const subgroupValue = d.data[subgroupName];
-      tooltip
-          .html("Medalha: " + subgroupName + "<br>" + "Value: " + subgroupValue)
-          .style("opacity", 1)
+
+      d3.selectAll("rect")
+			.transition()
+			.duration(200)
+			.style("opacity", .5)
+			.style("stroke", "transparent");
+		  d3.select(this)
+			.transition()
+			.duration(200)
+			.style("opacity", 1)
+			.style("stroke", "black");
+
+      tooltip.html("Country: " + d.data.country + "<br> Medal: " + subgroupName + "<br> Athletes: " + subgroupValue)
+            .style("left", (event.pageX + 15) + "px")
+            .style("top", (event.pageY - 28) + "px")
+            .transition().duration(400)
+            .style("opacity", 1); //! mudar o texto do tooltip
 
     }
-    const mousemove = function(event, d) {
-      tooltip.style("transform","translateY(-55%)")
-            .style("left",(event.x)/2+"px")
-            .style("top",(event.y)/2-30+"px")
-    }
+
     const mouseleave = function(event, d) {
-      tooltip
-        .style("opacity", 0)
+      d3.selectAll("rect")
+			.transition()
+			.duration(200)
+			.style("opacity", 1)
+			.style("stroke", "transparent");
+
+      tooltip.transition().duration(300)
+            .style("opacity", 0);
     }
 
     // Show the bars
@@ -407,7 +457,6 @@ function filter() {
           .attr("width",x.bandwidth())
           .attr("stroke", "grey")
         .on("mouseover", mouseover)
-        .on("mousemove", mousemove)
         .on("mouseleave", mouseleave)
 
   })

@@ -12,6 +12,18 @@
 
 
 <style>
+.flex-container {
+    display: flex;
+}
+
+.flex-child {
+    flex: 1;
+}  
+
+.flex-child:first-child {
+    margin-right: 20px;
+} 
+
   body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
   body {font-size:16px;}
   .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
@@ -108,13 +120,13 @@
     <a href="index.html"  class="w3-bar-item w3-button w3-hover-blue">Home</a> 
     <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Mapa</a> 
     <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalidades</a> 
-    <a href="ages.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
+    <a href="performance.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
     <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Autores</a> 
   </div>
 </nav>
 
 
-<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Performance </p></div>
+<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Performance dos países ao longo das ultimas 10 edições de Verão/Inverno  </p></div>
 
 
 <!-- !PAGE CONTENT! -->
@@ -130,8 +142,8 @@ padding-top: 2vw;">
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
 
 
-                <h1>Filtros</h1>
-                <p>Países</p>
+                <h3 style="margin-top: -1vw;">Filtros</h3>
+                <p">Países</p>
                 <div class="search-container">
                     
                     <div class="autocomplete" style="width:300px;">
@@ -155,16 +167,50 @@ padding-top: 2vw;">
             </div>
                 <hr class="rounded" style="width: 17vw;">
 
-                <p>Género</p>
-                <input type="radio" id="all" name="gender" value="all">
-                <label for="all">Todos</label><br>
-                <input type="radio" id="m" name="gender" value="m">
-                <label for="m">Homens</label><br>  
-                <input type="radio" id="f" name="gender" value="f">
-                <label for="f">Mulheres</label>
+                <p style="margin-top: -1vw; margin-bottom: 0.5vw;">Temporada</p>
+
+                <div class="flex-container">
+
+                  <div class="flex-child magenta">
+                    <input type="radio" id="summer" name="season" value="summer">
+                    <label for="summer">Verão</label><br>
+                  </div>
+                  
+                  <div class="flex-child green">
+                    <input type="radio" id="winter" name="season" value="winter">
+                    <label for="winter">Inverno</label><br> 
+                  </div>
+                  
+                </div>
+
+                
+                
+                 
                 <hr class="rounded" style="width: 17vw;">
 
-                <p>Medalhas</p>
+                <p style="margin-top: -1vw;margin-bottom: 0.5vw;">Género</p>
+                <div style="display: flex;">
+                  <div style="flex: 0.8;">
+                    <input type="radio" id="all" name="gender" value="all">
+                    <label for="all">Todos</label><br>
+                  </div>
+                  <div style="flex: 1;">
+                    <input type="radio" id="m" name="gender" value="m">
+                    <label for="m">Homens</label><br>  
+                  </div> 
+                  <div style="flex: 1;">
+                    <input type="radio" id="f" name="gender" value="f">
+                    <label for="f">Mulheres</label>
+                  </div>
+                </div>
+
+                
+                
+                
+                
+                <hr class="rounded" style="width: 17vw;">
+
+                <p style="margin-top: -1vw;margin-bottom: 0.5vw;">Medalhas</p>
                 <input type="radio" id="all_medal" name="medals" value="all_medal">
                 <label for="all_medal">Todos</label><br>
                 <input type="radio" id="any" name="medals" value="any">
@@ -176,9 +222,7 @@ padding-top: 2vw;">
                 <input type="radio" id="bronze" name="medals" value="bronze">
                 <label for="bronze">Bronze</label><br>
 
-                <br>
-
-                <input type="submit" value="Submit" style="margin-left: 12vw;" onclick="filter()">
+                <input type="submit" value="Submit" style="margin-left: 13vw;" onclick="filter()">
 
             </div>
             
@@ -214,17 +258,11 @@ const margin = {top: 10, right: 100, bottom: 30, left: 30},
         // List of groups (here I have one group per column)
         const allGroup = ["valueA", "valueB", "valueC"]
     
-        // Reformat the data: we need an array of arrays of {x, y} tuples
-        const dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
-          return {
-            name: grpName,
-            values: data.map(function(d) {
-              return {time: d.time, value: +d[grpName]};
-            })
-          };
-        });
+        
+
         // I strongly advise to have a look to dataReady with
-        //console.log(dataReady)
+        console.log(dataReady)
+        var dataReady=[{name: '', values: []}];
     
         // A color scale: one color for each group
         const myColor = d3.scaleOrdinal()
@@ -315,7 +353,7 @@ const margin = {top: 10, right: 100, bottom: 30, left: 30},
 
 <script>
 
-  function create_graph(pais1,pais2,pais3,genero,medalhas){
+  function create_graph(pais1,pais2,pais3,genero,medalhas,temporada){
 
     d3.select("#my_dataviz").selectAll('*').remove();
 
@@ -1044,7 +1082,13 @@ const margin = {top: 10, right: 100, bottom: 30, left: 30},
         // List of groups (here I have one group per column)
         const allGroup = [pais1, pais2, pais3]
 
-        const jogos = ["1980 Summer","1984 Summer","1988 Summer","1992 Summer","1996 Summer","2000 Summer","2004 Summer","2008 Summer","2012 Summer","2016 Summer"];
+        var jogos;
+
+        if (temporada == "summer"){
+           jogos = ["1980 Summer","1984 Summer","1988 Summer","1992 Summer","1996 Summer","2000 Summer","2004 Summer","2008 Summer","2012 Summer","2016 Summer"];
+        }else{
+           jogos = ["1980 Winter","1984 Winter","1988 Winter","1992 Winter","1994 Winter","1998 Winter","2002 Winter","2006 Winter","2010 Winter","2014 Winter"];
+        }
         // Reformat the data: we need an array of arrays of {x, y} tuples
         const dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
           return {
@@ -1087,11 +1131,11 @@ const margin = {top: 10, right: 100, bottom: 30, left: 30},
       	  .duration(1000)
       	  .attr('stroke-width',5);
 
-          tooltip.style("left", (event.pageX + 15) + "px")
+          tooltip.html('Athletes: ' + d.toElement.__data__.value  + '<br> Year: ' + d.toElement.__data__.time)
+            .style("left", (event.pageX + 15) + "px")
             .style("top", (event.pageY - 28) + "px")
             .transition().duration(400)
-            .style("opacity", 1)
-            .text(d.toElement.__data__.value + ' athletes ' + 'in ' + d.toElement.__data__.time); //! mudar o texto do tooltip
+            .style("opacity", 1); //! mudar o texto do tooltip
         }
 
         let mouseLeave = function() {
@@ -1207,6 +1251,9 @@ function filter() {
     var pais2 = document.getElementById("pais2").value;
     var pais3 = document.getElementById("pais3").value;
 
+    var summer = document.getElementById("summer");
+    var winter = document.getElementById("winter");
+
 
     var genero_all = document.getElementById("all");
     var genero_m = document.getElementById("m");
@@ -1218,26 +1265,31 @@ function filter() {
     var medalhas_silver = document.getElementById("silver");
     var medalhas_bronze = document.getElementById("bronze");
 
-    if (pais1 == "" && pais2 == "" && pais3 == "") {
-        alert("Por favor, selecione pelo menos 1 país");
+    if (pais1 == undefined && pais2 == undefined && pais3 == undefined) {
+        alert("Por favor, selecione 3 países");
         return
     } 
 
-    if (!countries.includes(pais1) && pais1 != "") {
+    if (!countries.includes(pais1) && pais1 != undefined) {
         alert("País1 inválido");
         return
     }
-    if (!countries.includes(pais2) && pais2 != "") {
+    if (!countries.includes(pais2) && pais2 != undefined) {
         alert("País2 inválido");
         return
     }
-    if (!countries.includes(pais3) && pais3 != "") {
+    if (!countries.includes(pais3) && pais3 != undefined) {
         alert("País3 inválido");
         return
     }
     
     if (genero_all.checked == false && genero_m.checked == false && genero_f.checked == false) {
         alert("Género não selecionado");
+        return
+    }
+    
+    if (summer.checked == false && winter.checked == false) {
+        alert("Temporada não selecionada");
         return
     } 
     
@@ -1252,6 +1304,9 @@ function filter() {
     console.log(pais2);
     console.log(pais3);
 
+    console.log(summer.checked);
+    console.log(winter.checked);
+
     console.log(genero_all.checked);
     console.log(genero_m.checked);
     console.log(genero_f.checked);
@@ -1260,6 +1315,12 @@ function filter() {
     console.log(medalhas_gold.checked);
     console.log(medalhas_silver.checked);
     console.log(medalhas_bronze.checked);
+
+    if (summer.checked == true) {
+        temporada = "summer"
+    } else if (winter.checked == true) {
+        temporada = "winter"
+    }
 
     if (genero_all.checked == true) {
         genero = "all"
@@ -1282,7 +1343,7 @@ function filter() {
     }
 
 
-    create_graph(pais1, pais2, pais3, genero, medalhas);
+    create_graph(pais1, pais2, pais3, genero, medalhas, temporada);
 
 }
 
