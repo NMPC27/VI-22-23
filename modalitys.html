@@ -113,8 +113,11 @@
 <!-- !PAGE CONTENT! -->
 <div style="margin-left: 300px;
 padding-left: 2vw;
-padding-top: 2vw;">
+padding-top: 1vw;">
 
+    <div style="z-index: 5; transform: rotate(-90deg); margin-left: -23vw; width: 47vw;">
+      <div style="text-align: left;">Número de medalhas </div> 
+    </div>
     <div style="width: 100%;">
         <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
             <!-- Load d3.js -->
@@ -122,6 +125,8 @@ padding-top: 2vw;">
 
             <!-- Create a div where the graph will take place -->
             <div id="my_dataviz" style="height:600px;" ></div>
+            <div style="z-index: 5; text-align: center;"> Países </div>
+            
         </div>
         <div style="margin-left: 25%; height: 600px;" class="w3-light-gray"> 
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
@@ -152,7 +157,7 @@ padding-top: 2vw;">
                 <label for="nan">Não Medalhados</label><br>
                 
 
-                <svg id="my_dataviz3" height=300 width=450></svg>
+                <svg id="my_dataviz3" height=150 width=275 style="margin-top: 1vw;"></svg>
 
                 <input type="submit" value="Submit" style="margin-left: 13vw;" onclick="filter()">
 
@@ -164,6 +169,64 @@ padding-top: 2vw;">
 </div>
 
 <script>
+const svg2 = d3.select("#my_dataviz3").append("svg").attr("width", 275).attr("height", 155)
+
+svg2.append("rect")
+      .attr("x", 10)
+      .attr("y", 10)
+      .attr("width", 20)
+      .attr("height", 20)
+      .attr('fill', '#FFD700');
+
+svg2.append('text')
+  .attr('x', 40)
+  .attr('y', 25)
+  .attr('stroke', '#FFD700')
+  .style("font-size", 14)
+  .text("Ouro");
+
+svg2.append("rect")
+  .attr("x", 10)
+  .attr("y", 40)
+  .attr("width", 20)
+  .attr("height", 20)
+  .attr('fill', '#C0C0C0');
+
+  svg2.append('text')
+  .attr('x', 40)
+  .attr('y', 55)
+  .attr('stroke', '#C0C0C0')
+  .style("font-size", 14)
+  .text("Prata");
+
+svg2.append("rect")
+  .attr("x", 10)
+  .attr("y", 70)
+  .attr("width", 20)
+  .attr("height", 20)
+  .attr('fill', '#CD7F32');
+
+  svg2.append('text')
+  .attr('x', 40)
+  .attr('y', 85)
+  .attr('stroke', '#CD7F32')
+  .style("font-size", 14)
+  .text("Bronze");
+
+svg2.append("rect")
+  .attr("x", 10)
+  .attr("y", 100)
+  .attr("width", 20)
+  .attr("height", 20)
+  .attr('fill', '#000000');
+
+
+  svg2.append('text')
+  .attr('x', 40)
+  .attr('y', 115)
+  .attr('stroke', '#000000')
+  .style("font-size", 14)
+  .text("Participante");
 
 function filter() {
 

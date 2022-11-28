@@ -132,11 +132,15 @@
 <!-- !PAGE CONTENT! -->
 <div style="margin-left: 300px;
 padding-left: 2vw;
-padding-top: 2vw;">
+padding-top: 1vw;">
 
+    <div style="z-index: 5; transform: rotate(-90deg); margin-left: -24vw; width: 47vw;">
+      <div style="text-align: left;">Número de medalhas </div> 
+    </div>
     <div style="width: 100%;">
         <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
           <div id="my_dataviz"></div>
+          <div style="z-index: 5; text-align: center;"> Edições </div>
         </div>
         <div style="margin-left: 25%; height: 600px;" class="w3-light-gray"> 
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
@@ -1227,7 +1231,7 @@ const margin = {top: 10, right: 100, bottom: 30, left: 30},
           .data(dataReady)
           .join('g')
             .append("text")
-              .attr('x', (d,i) => 30 + i*90)
+              .attr('x', (d,i) => 30 + i*200)
               .attr('y', 30)
               .text(d => d.name)
               .style("fill", d => myColor(d.name))
