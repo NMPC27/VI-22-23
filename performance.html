@@ -135,7 +135,7 @@ padding-left: 2vw;
 padding-top: 1vw;">
 
     <div style="z-index: 5; transform: rotate(-90deg); margin-left: -24vw; width: 47vw;">
-      <div style="text-align: left;">Número de medalhas </div> 
+      <div style="text-align: left;"><span id="legenda_lateral"> Número de Medalhas </span></div> 
     </div>
     <div style="width: 100%;">
         <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
@@ -1268,6 +1268,12 @@ function filter() {
     var medalhas_gold = document.getElementById("gold");
     var medalhas_silver = document.getElementById("silver");
     var medalhas_bronze = document.getElementById("bronze");
+
+    if (medalhas_all.checked){
+      document.getElementById("legenda_lateral").textContent="Numero de Participantes";
+    } else {
+      document.getElementById("legenda_lateral").textContent="Numero de Medalhas";
+    }
 
     if (pais1 == undefined && pais2 == undefined && pais3 == undefined) {
         alert("Por favor, selecione 3 países");
