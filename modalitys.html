@@ -99,15 +99,15 @@
   </div>
   <div class="w3-bar-block">
     <a href="index.html"  class="w3-bar-item w3-button w3-hover-blue">Home</a> 
-    <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Mapa</a> 
-    <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalidades</a> 
+    <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Map</a> 
+    <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalities</a> 
     <a href="performance.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
-    <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Autores</a> 
+    <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Authors</a> 
   </div>
 </nav>
 
 
-<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Modalidades </p></div>
+<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Modalities </p></div>
 
 
 <!-- !PAGE CONTENT! -->
@@ -116,7 +116,7 @@ padding-left: 2vw;
 padding-top: 1vw;">
 
     <div style="z-index: 5; transform: rotate(-90deg); margin-left: -23vw; width: 47vw;">
-      <div style="text-align: left;"><span id="legenda_lateral"> Número de Medalhas </span></div> 
+      <div style="text-align: left;"><span id="legenda_lateral"> Number of Medals </span></div> 
     </div>
     <div style="width: 100%;">
         <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
@@ -125,36 +125,36 @@ padding-top: 1vw;">
 
             <!-- Create a div where the graph will take place -->
             <div id="my_dataviz" style="height:600px;" ></div>
-            <div style="z-index: 5; text-align: center;"> Países </div>
+            <div style="z-index: 5; text-align: center;"> Countries </div>
             
         </div>
         <div style="margin-left: 25%; height: 600px;" class="w3-light-gray"> 
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
 
 
-                <h1>Filtros</h1>
-                <p>Modalidade</p>
+                <h1>Filters</h1>
+                <p>Modalities</p>
                 <div class="search-container">
                     
                     <div class="autocomplete" style="width:300px;">
-                        <input id="myInput" type="text" name="myCountry" placeholder="Modalidade">
+                        <input id="myInput" type="text" name="myCountry" placeholder="Ex. Athletics Women’s 1,500 metres">
                     </div>
                     
                 </div>
                 <hr class="rounded" style="width: 17vw;">
 
-                <p>Medalhas</p>
+                <p>Medals</p>
                 
                 <input type="radio" id="any" name="medals" value="any">
-                <label for="any">Todos</label><br>
+                <label for="any">All</label><br>
                 <input type="radio" id="gold" name="medals" value="gold">
-                <label for="gold">Ouro</label><br>  
+                <label for="gold">Gold</label><br>  
                 <input type="radio" id="silver" name="medals" value="silver">
-                <label for="silver">Prata</label><br>  
+                <label for="silver">Silver</label><br>  
                 <input type="radio" id="bronze" name="medals" value="bronze">
                 <label for="bronze">Bronze</label><br>
                 <input type="radio" id="nan" name="medals" value="nan">
-                <label for="nan">Não Medalhados</label><br>
+                <label for="nan">Not Medaled</label><br>
                 
 
                 <svg id="my_dataviz3" height=150 width=275 style="margin-top: 1vw;"></svg>
@@ -183,7 +183,7 @@ svg2.append('text')
   .attr('y', 25)
   .attr('stroke', '#FFD700')
   .style("font-size", 14)
-  .text("Ouro");
+  .text("Gold");
 
 svg2.append("rect")
   .attr("x", 10)
@@ -197,7 +197,7 @@ svg2.append("rect")
   .attr('y', 55)
   .attr('stroke', '#C0C0C0')
   .style("font-size", 14)
-  .text("Prata");
+  .text("Silver");
 
 svg2.append("rect")
   .attr("x", 10)
@@ -226,7 +226,7 @@ svg2.append("rect")
   .attr('y', 115)
   .attr('stroke', '#000000')
   .style("font-size", 14)
-  .text("Participante");
+  .text("Participant");
 
 function filter() {
 
@@ -239,25 +239,25 @@ function filter() {
     var medalhas_nan = document.getElementById("nan");
 
     if (medalhas_any.checked){
-      document.getElementById("legenda_lateral").textContent="Numero de Medalhas/Participantes";
+      document.getElementById("legenda_lateral").textContent="Number of Medals/Participants";
     } else if (medalhas_nan.checked){
-      document.getElementById("legenda_lateral").textContent="Numero de Participantes";
+      document.getElementById("legenda_lateral").textContent="Number of participants";
     } else {
-      document.getElementById("legenda_lateral").textContent="Numero de Medalhas";
+      document.getElementById("legenda_lateral").textContent="Number of Medals";
     }
 
     if (modalidade == "") {
-        alert("Modalidade não selecionada");
+        alert("Modalities not selected");
         return
     } 
 
     if (!countries.includes(modalidade)){
-        alert("Modalidade inválida");
+        alert("Invalid modalities");
         return
     }
     
     if (medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false && medalhas_nan.checked == false) {
-        alert("Medalhas não selecionadas");
+        alert("Medals not selected");
         return
     }
 
@@ -300,7 +300,7 @@ function filter() {
       // List of subgroups = header of the csv files = soil condition here
       const subgroups = data.columns.slice(2)
 
-      const groups = ['Escolha uma modalidade']
+      const groups = ['Choose Modality']
     
       // Add X axis
       const x = d3.scaleBand()

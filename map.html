@@ -85,15 +85,15 @@ input[type=submit] {
   </div>
   <div class="w3-bar-block">
     <a href="index.html"  class="w3-bar-item w3-button w3-hover-blue">Home</a> 
-    <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Mapa</a> 
-    <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalidades</a> 
+    <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Map</a> 
+    <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalities</a> 
     <a href="performance.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
-    <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Autores</a> 
+    <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Authors</a> 
   </div>
 </nav>
 
 
-<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Mapa </p></div>
+<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Map </p></div>
 
 
 <!-- !PAGE CONTENT! -->
@@ -1104,35 +1104,35 @@ function click(d) {
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
 
 
-                <h1>Filtros</h1>
-                <p>Edição</p>
+                <h1>Filters</h1>
+                <p>Edition</p>
                 <div class="search-container">
                     
                     <div class="autocomplete" style="width:300px;">
-                        <input id="myInput" type="text" name="myCountry" placeholder="Edição">
+                        <input id="myInput" type="text" name="myCountry" placeholder="Ex. 2008 Summer">
                     </div>
                     
                 </div>
                 <hr class="rounded" style="width: 17vw;">
 
-                <p>Género</p>
+                <p>Gender</p>
                 <input type="radio" id="all" name="gender" value="all">
-                <label for="all">Todos</label><br>
+                <label for="all">All</label><br>
                 <input type="radio" id="m" name="gender" value="m">
-                <label for="m">Homens</label><br>  
+                <label for="m">Men</label><br>  
                 <input type="radio" id="f" name="gender" value="f">
-                <label for="f">Mulheres</label>
+                <label for="f">Women</label>
                 <hr class="rounded" style="width: 17vw;">
 
-                <p>Medalhas</p>
+                <p>Medals</p>
                 <input type="radio" id="all_medal" name="medals" value="all_medal">
-                <label for="all_medal">Todos</label><br>
+                <label for="all_medal">All</label><br>
                 <input type="radio" id="any" name="medals" value="any">
-                <label for="any">Qualquer medalha</label><br>
+                <label for="any">Any Medal</label><br>
                 <input type="radio" id="gold" name="medals" value="gold">
-                <label for="gold">Ouro</label><br>  
+                <label for="gold">Gold</label><br>  
                 <input type="radio" id="silver" name="medals" value="silver">
-                <label for="silver">Prata</label><br>  
+                <label for="silver">Silver</label><br>  
                 <input type="radio" id="bronze" name="medals" value="bronze">
                 <label for="bronze">Bronze</label><br>
 
@@ -1164,22 +1164,22 @@ function filter() {
     var medalhas_bronze = document.getElementById("bronze");
 
     if (edicao == "") {
-        alert("Edição não selecionada");
+        alert("Edition not selected");
         return
     } 
 
     if (!countries.includes(edicao)){
-        alert("Edição inválida");
+        alert("Invalid edition");
         return
     }
     
     if (genero_all.checked == false && genero_m.checked == false && genero_f.checked == false) {
-        alert("Género não selecionado");
+        alert("Genre not selected");
         return
     } 
     
     if ( medalhas_all.checked == false && medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false) {
-        alert("Medalhas não selecionadas");
+        alert("Medals not selected");
         return
     }
 

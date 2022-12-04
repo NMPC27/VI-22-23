@@ -118,15 +118,15 @@
   </div>
   <div class="w3-bar-block">
     <a href="index.html"  class="w3-bar-item w3-button w3-hover-blue">Home</a> 
-    <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Mapa</a> 
-    <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalidades</a> 
+    <a href="map.html"  class="w3-bar-item w3-button w3-hover-yellow">Map</a> 
+    <a href="modalitys.html"  class="w3-bar-item w3-button w3-hover-black">Modalities</a> 
     <a href="performance.html"  class="w3-bar-item w3-button w3-hover-green">Performance</a> 
-    <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Autores</a> 
+    <a href="authors.html"  class="w3-bar-item w3-button w3-hover-red">Authors</a> 
   </div>
 </nav>
 
 
-<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Performance dos países ao longo das ultimas 10 edições de Verão/Inverno  </p></div>
+<div class="w3-light-gray w3-container w3-padding" style="margin-top:0px;padding-right:58px"><p class="w3-center">Country performance over the last 10 Summer/Winter editions</p></div>
 
 
 <!-- !PAGE CONTENT! -->
@@ -135,54 +135,54 @@ padding-left: 2vw;
 padding-top: 1vw;">
 
     <div style="z-index: 5; transform: rotate(-90deg); margin-left: -24vw; width: 47vw;">
-      <div style="text-align: left;"><span id="legenda_lateral"> Número de Medalhas </span></div> 
+      <div style="text-align: left;"><span id="legenda_lateral"> Number of Medals </span></div> 
     </div>
     <div style="width: 100%;">
         <div style="width: 75%; height: 600px; float: left; background: rgb(255, 255, 255);"> 
           <div id="my_dataviz"></div>
-          <div style="z-index: 5; text-align: center;"> Edições </div>
+          <div style="z-index: 5; text-align: center;"> Editions </div>
         </div>
         <div style="margin-left: 25%; height: 600px;" class="w3-light-gray"> 
             <div style="margin-left: 40.5vw;padding-top: 1vw;">
 
 
-                <h3 style="margin-top: -1vw;">Filtros</h3>
-                <p">Países</p>
+                <h3 style="margin-top: -1vw;">Filters</h3>
+                <p">Countries</p>
                 <div class="search-container">
                     
                     <div class="autocomplete" style="width:300px;">
-                        <input id="pais1" type="text" name="myCountry" placeholder="País">
+                        <input id="pais1" type="text" name="myCountry" placeholder="Ex. USA">
                     </div>
                     
                 </div>
                 <div class="search-container">
                     
                   <div class="autocomplete" style="width:300px;">
-                      <input id="pais2" type="text" name="myCountry" placeholder="País">
+                      <input id="pais2" type="text" name="myCountry" placeholder="Ex. Portugal">
                   </div>
                   
               </div>
               <div class="search-container">
                     
                 <div class="autocomplete" style="width:300px;">
-                    <input id="pais3" type="text" name="myCountry" placeholder="País">
+                    <input id="pais3" type="text" name="myCountry" placeholder="Ex. Spain">
                 </div>
                 
             </div>
                 <hr class="rounded" style="width: 17vw;">
 
-                <p style="margin-top: -1vw; margin-bottom: 0.5vw;">Temporada</p>
+                <p style="margin-top: -1vw; margin-bottom: 0.5vw;">Season</p>
 
                 <div class="flex-container">
 
                   <div class="flex-child magenta">
                     <input type="radio" id="summer" name="season" value="summer">
-                    <label for="summer">Verão</label><br>
+                    <label for="summer">Summer</label><br>
                   </div>
                   
                   <div class="flex-child green">
                     <input type="radio" id="winter" name="season" value="winter">
-                    <label for="winter">Inverno</label><br> 
+                    <label for="winter">Winter</label><br> 
                   </div>
                   
                 </div>
@@ -192,19 +192,19 @@ padding-top: 1vw;">
                  
                 <hr class="rounded" style="width: 17vw;">
 
-                <p style="margin-top: -1vw;margin-bottom: 0.5vw;">Género</p>
+                <p style="margin-top: -1vw;margin-bottom: 0.5vw;">Gender</p>
                 <div style="display: flex;">
                   <div style="flex: 0.8;">
                     <input type="radio" id="all" name="gender" value="all">
-                    <label for="all">Todos</label><br>
+                    <label for="all">All</label><br>
                   </div>
                   <div style="flex: 1;">
                     <input type="radio" id="m" name="gender" value="m">
-                    <label for="m">Homens</label><br>  
+                    <label for="m">Men</label><br>  
                   </div> 
                   <div style="flex: 1;">
                     <input type="radio" id="f" name="gender" value="f">
-                    <label for="f">Mulheres</label>
+                    <label for="f">Women</label>
                   </div>
                 </div>
 
@@ -214,15 +214,15 @@ padding-top: 1vw;">
                 
                 <hr class="rounded" style="width: 17vw;">
 
-                <p style="margin-top: -1vw;margin-bottom: 0.5vw;">Medalhas</p>
+                <p style="margin-top: -1vw;margin-bottom: 0.5vw;">Medals</p>
                 <input type="radio" id="all_medal" name="medals" value="all_medal">
-                <label for="all_medal">Todos</label><br>
+                <label for="all_medal">All</label><br>
                 <input type="radio" id="any" name="medals" value="any">
-                <label for="any">Qualquer medalha</label><br>
+                <label for="any">Any Medal</label><br>
                 <input type="radio" id="gold" name="medals" value="gold">
-                <label for="gold">Ouro</label><br>  
+                <label for="gold">Gold</label><br>  
                 <input type="radio" id="silver" name="medals" value="silver">
-                <label for="silver">Prata</label><br>  
+                <label for="silver">Silver</label><br>  
                 <input type="radio" id="bronze" name="medals" value="bronze">
                 <label for="bronze">Bronze</label><br>
 
@@ -1270,41 +1270,41 @@ function filter() {
     var medalhas_bronze = document.getElementById("bronze");
 
     if (medalhas_all.checked){
-      document.getElementById("legenda_lateral").textContent="Numero de Participantes";
+      document.getElementById("legenda_lateral").textContent="Number of participants";
     } else {
-      document.getElementById("legenda_lateral").textContent="Numero de Medalhas";
+      document.getElementById("legenda_lateral").textContent="Number of Medals";
     }
 
     if (pais1 == undefined && pais2 == undefined && pais3 == undefined) {
-        alert("Por favor, selecione 3 países");
+        alert("Select at least three country");
         return
     } 
 
     if (!countries.includes(pais1) && pais1 != undefined) {
-        alert("País1 inválido");
+        alert("Country 1 Invalid");
         return
     }
     if (!countries.includes(pais2) && pais2 != undefined) {
-        alert("País2 inválido");
+        alert("Country 2 Invalid");
         return
     }
     if (!countries.includes(pais3) && pais3 != undefined) {
-        alert("País3 inválido");
+        alert("Country 3 Invalid");
         return
     }
     
     if (genero_all.checked == false && genero_m.checked == false && genero_f.checked == false) {
-        alert("Género não selecionado");
+        alert("Gender not selected");
         return
     }
     
     if (summer.checked == false && winter.checked == false) {
-        alert("Temporada não selecionada");
+        alert("Season not selected");
         return
     } 
     
     if (medalhas_all.checked == false && medalhas_any.checked == false && medalhas_gold.checked == false && medalhas_silver.checked == false && medalhas_bronze.checked == false) {
-        alert("Medalhas não selecionadas");
+        alert("Medals not selected");
         return
     }
 
